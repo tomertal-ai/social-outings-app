@@ -2,146 +2,193 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [age, setAge] = useState('');
+  const [city, setCity] = useState('');
+  const [step, setStep] = useState(1);
 
   const handleContinue = () => {
-    // כאן נשמור את תאריך הלידה בעתיד
-    // עכשיו פשוט נעבור למסך הבית
-    router.replace('/home');
+    if (step === 1) {
+      setStep(2);
+    } else {
+      router.replace('/(tabs)' as any);
+    }
   };
+
+  const features = [
+    { icon: 'calendar', text: 'ארגן מסיבות וצאת עם חברים חדשים' },
+    { icon: 'musical-notes', text: 'מצא מועדונים והזמן כרטיסים' },
+    { icon: 'chatbubbles', text: 'תקשר עם המשתתפים לפני האירוע' },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={styles.logo}>:)</Text>
-      </View>
-      
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.content}>
-          <Text style={styles.title}>ברוכים הבאים! 🎉</Text>
-          
-          <View style={styles.dateInputContainer}>
-            <Text style={styles.label}>בן/בת כמה את/ה</Text>
-            
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+
+        <View style={styles.heroSection}>
+          <View style={styles.logoCircle}>
+            <Text style={styles.logoEmoji}>🎉</Text>
+          </View>
+          <Text style={styles.appName}>יציאות חברתיות</Text>
+          <Text style={styles.tagline}>צא, תכיר, תהנה</Text>
+        </View>
+
+        {step === 1 ? (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>מה מביא אותך לכאן?</Text>
+            {features.map((f, i) => (
+              <View key={i} style={styles.featureRow}>
+                <Text style={styles.featureText}>{f.text}</Text>
+                <View style={styles.featureIcon}>
+                  <Ionicons name={f.icon as any} size={20} color="#f97316" />
+                </View>
+              </View>
+            ))}
+            <TouchableOpacity style={styles.button} onPress={handleContinue}>
+              <Text style={styles.buttonText}>בוא נתחיל!</Text>
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>ספר לנו קצת עליך</Text>
+
+            <Text style={styles.label}>שם *</Text>
             <TextInput
-              style={styles.ageInput}
-              placeholder="הכנס את הגיל שלך"
+              style={styles.input}
+              placeholder="השם שלך"
+              value={name}
+              onChangeText={setName}
+              textAlign="right"
+            />
+
+            <Text style={styles.label}>גיל *</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="הגיל שלך"
               value={age}
               onChangeText={setAge}
               keyboardType="numeric"
               maxLength={3}
+              textAlign="right"
             />
 
-            <Text style={styles.hint}>
-              המידע הזה עוזר לנו להציע לך אירועים מתאימים
-            </Text>
+            <Text style={styles.label}>עיר מגורים</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="מאיזו עיר אתה?"
+              value={city}
+              onChangeText={setCity}
+              textAlign="right"
+            />
+
+            <Text style={styles.hint}>המידע שלך נשמר בצורה מאובטחת</Text>
+
+            <TouchableOpacity style={styles.button} onPress={handleContinue}>
+              <Text style={styles.buttonText}>כניסה לאפליקציה</Text>
+              <Ionicons name="arrow-back" size={20} color="#fff" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => setStep(1)} style={styles.backLink}>
+              <Text style={styles.backLinkText}>חזור</Text>
+            </TouchableOpacity>
           </View>
+        )}
 
-          <TouchableOpacity 
-            style={styles.button}
-            onPress={handleContinue}
-          >
-            <Text style={styles.buttonText}>המשך</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.privacyText}>
-            המידע שלך נשמר בצורה מאובטחת ולא ישותף עם אף אחד
-          </Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff7ed',
-  },
-  scrollContent: {
-    flex: 1,
+  container: { flex: 1, backgroundColor: '#fff7ed' },
+  scrollContent: { flexGrow: 1, padding: 24, justifyContent: 'center' },
+  heroSection: { alignItems: 'center', marginBottom: 32 },
+  logoCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#f97316',
+    alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 16,
+    shadowColor: '#f97316',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  logoContainer: {
-    position: 'absolute',
-    top: 110,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
+  logoEmoji: { fontSize: 48 },
+  appName: { fontSize: 32, fontWeight: 'bold', color: '#f97316', marginBottom: 4 },
+  tagline: { fontSize: 16, color: '#9ca3af' },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  content: {
-    padding: 30,
-    alignItems: 'center',
-    marginTop: 100,
-  },
-  logo: {
-    fontSize: 120,
-    color: '#fb923c',
-    textShadowColor: '#f97316',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 20,
-  },
-  title: {
-    fontSize: 58,
-    fontWeight: 'bold',
-    color: '#f97316',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
-    marginBottom: 40,
-    lineHeight: 24,
-  },
-  dateInputContainer: {
-    width: '100%',
-    marginBottom: 30,
-  },
-  label: {
-    fontSize: 18,
+  cardTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#1f2937',
-    marginBottom: 15,
-    textAlign: 'center',
+    textAlign: 'right',
+    marginBottom: 20,
   },
-  ageInput: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    padding: 15,
-    fontSize: 18,
-    textAlign: 'center',
-    borderWidth: 2,
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginBottom: 16,
+  },
+  featureText: { fontSize: 14, color: '#374151', textAlign: 'right', flex: 1 },
+  featureIcon: {
+    backgroundColor: '#fff7ed',
+    borderRadius: 10,
+    padding: 8,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 6,
+    textAlign: 'right',
+  },
+  input: {
+    backgroundColor: '#f9fafb',
+    borderRadius: 10,
+    padding: 13,
+    marginBottom: 14,
+    fontSize: 15,
+    borderWidth: 1,
     borderColor: '#e5e7eb',
-    marginBottom: 15,
+    color: '#1f2937',
   },
   hint: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#9ca3af',
     textAlign: 'center',
-    marginTop: 15,
+    marginBottom: 16,
   },
   button: {
     backgroundColor: '#f97316',
     borderRadius: 12,
-    padding: 18,
-    width: '100%',
+    paddingVertical: 15,
     alignItems: 'center',
-    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 4,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  privacyText: {
-    fontSize: 12,
-    color: '#9ca3af',
-    textAlign: 'center',
-    lineHeight: 18,
-  },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  backLink: { alignItems: 'center', marginTop: 14 },
+  backLinkText: { fontSize: 14, color: '#9ca3af' },
 });

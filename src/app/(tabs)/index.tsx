@@ -21,11 +21,8 @@ export default function HomeScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>מה תרצה לעשות?</Text>
-          
-          <TouchableOpacity 
-            style={styles.card}
-            onPress={() => router.push('/(tabs)/parties')}
-          >
+
+          <TouchableOpacity style={styles.card} onPress={() => router.push('/parties' as any)}>
             <Ionicons name="chevron-back" size={20} color="#d1d5db" />
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>ארגן מסיבה</Text>
@@ -36,10 +33,7 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.card}
-            onPress={() => router.push('/clubs')}
-          >
+          <TouchableOpacity style={styles.card} onPress={() => router.push('/clubs' as any)}>
             <Ionicons name="chevron-back" size={20} color="#d1d5db" />
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>מועדונים</Text>
@@ -50,10 +44,7 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.card}
-            onPress={() => router.push('/(tabs)/my-events')}
-          >
+          <TouchableOpacity style={styles.card} onPress={() => router.push('./my-events' as any)}>
             <Ionicons name="chevron-back" size={20} color="#d1d5db" />
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>האירועים שלי</Text>
@@ -64,10 +55,7 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={styles.card}
-            onPress={() => router.push('/(tabs)/map')}
-          >
+          <TouchableOpacity style={styles.card} onPress={() => router.push('./map' as any)}>
             <Ionicons name="chevron-back" size={20} color="#d1d5db" />
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>מפת יציאות</Text>
@@ -93,107 +81,33 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-  },
-  scrollView: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: '#f8fafc' },
+  scrollView: { flex: 1 },
   header: {
-    padding: 24,
-    paddingTop: 20,
-    backgroundColor: '#f97316',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    padding: 24, paddingTop: 20, backgroundColor: '#f97316',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderBottomLeftRadius: 24, borderBottomRightRadius: 24,
   },
-  headerContent: {
-    flex: 1,
-  },
-  profileButton: {
-    marginLeft: 10,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  subtitle: {
-    fontSize: 15,
-    color: 'rgba(255,255,255,0.85)',
-    marginTop: 4,
-  },
-  section: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 15,
-    textAlign: 'right',
-  },
+  headerContent: { flex: 1 },
+  profileButton: { marginLeft: 10 },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
+  subtitle: { fontSize: 15, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
+  section: { padding: 20 },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', color: '#1f2937', marginBottom: 15, textAlign: 'right' },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: '#fff', borderRadius: 16, padding: 20, marginBottom: 14,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08,
+    shadowRadius: 8, elevation: 3, flexDirection: 'row', alignItems: 'center',
   },
-  cardIcon: {
-    backgroundColor: '#fff7ed',
-    borderRadius: 12,
-    padding: 10,
-    marginLeft: 14,
-  },
-  cardTitle: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    marginBottom: 4,
-    textAlign: 'right',
-  },
-  cardDescription: {
-    fontSize: 13,
-    color: '#6b7280',
-    textAlign: 'right',
-  },
-  cardArrow: {
-    marginRight: 'auto',
-    transform: [{ rotate: '180deg' }],
-  },
-  cardContent: {
-    flex: 1,
-  },
+  cardIcon: { backgroundColor: '#fff7ed', borderRadius: 12, padding: 10, marginLeft: 14 },
+  cardTitle: { fontSize: 17, fontWeight: 'bold', color: '#1f2937', marginBottom: 4, textAlign: 'right' },
+  cardDescription: { fontSize: 13, color: '#6b7280', textAlign: 'right' },
+  cardContent: { flex: 1 },
   emptyState: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 36,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    backgroundColor: '#fff', borderRadius: 16, padding: 36, alignItems: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05,
+    shadowRadius: 4, elevation: 1,
   },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#6b7280',
-    marginTop: 12,
-  },
-  emptySubtext: {
-    fontSize: 13,
-    color: '#9ca3af',
-    marginTop: 4,
-  },
+  emptyText: { fontSize: 16, fontWeight: '600', color: '#6b7280', marginTop: 12 },
+  emptySubtext: { fontSize: 13, color: '#9ca3af', marginTop: 4 },
 });
