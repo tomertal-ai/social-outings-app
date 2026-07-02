@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 120 120">
+  <defs>
+    <linearGradient id="logoGradient" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#24C8FF"/>
+      <stop offset="0.5" stop-color="#5B6BFF"/>
+      <stop offset="1" stop-color="#D946EF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Thick circular location pin with sharp bottom point and circular cutout -->
+  <path
+    d="M60 6 A48 48 0 1 1 32 96 Q46 112 60 124 Q74 112 92 96 A48 48 0 1 1 60 6 Z M60 22 A32 32 0 1 1 60 86 A32 32 0 1 1 60 22 Z"
+    fill="url(#logoGradient)"
+    fill-rule="evenodd"
+  />
+
+  <!-- Three people circles centered at the bottom, slightly overlapping the inner edge -->
+  <circle cx="50" cy="90.5" r="6.5" fill="url(#logoGradient)"/>
+  <circle cx="60" cy="93" r="6.5" fill="url(#logoGradient)"/>
+  <circle cx="70" cy="90.5" r="6.5" fill="url(#logoGradient)"/>
+</svg>

@@ -3,6 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import Logo from '../components/Logo';
+import GradientButton from '../components/GradientButton';
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -15,7 +17,7 @@ export default function WelcomeScreen() {
     if (step === 1) {
       setStep(2);
     } else {
-      router.replace('/(tabs)' as any);
+      router.replace('/(tabs)/map' as any);
     }
   };
 
@@ -31,7 +33,7 @@ export default function WelcomeScreen() {
 
         <View style={styles.heroSection}>
           <View style={styles.logoCircle}>
-            <Text style={styles.logoEmoji}>🎉</Text>
+            <Logo size={120} showBackground={false} />
           </View>
           <Text style={styles.appName}>יציאות חברתיות</Text>
           <Text style={styles.tagline}>צא, תכיר, תהנה</Text>
@@ -44,14 +46,14 @@ export default function WelcomeScreen() {
               <View key={i} style={styles.featureRow}>
                 <Text style={styles.featureText}>{f.text}</Text>
                 <View style={styles.featureIcon}>
-                  <Ionicons name={f.icon as any} size={20} color="#f97316" />
+                  <Ionicons name={f.icon as any} size={20} color="#7B61FF" />
                 </View>
               </View>
             ))}
-            <TouchableOpacity style={styles.button} onPress={handleContinue}>
+            <GradientButton onPress={handleContinue}>
               <Text style={styles.buttonText}>בוא נתחיל!</Text>
               <Ionicons name="arrow-back" size={20} color="#fff" />
-            </TouchableOpacity>
+            </GradientButton>
           </View>
         ) : (
           <View style={styles.card}>
@@ -61,6 +63,7 @@ export default function WelcomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="השם שלך"
+              placeholderTextColor="#9ca3af"
               value={name}
               onChangeText={setName}
               textAlign="right"
@@ -70,6 +73,7 @@ export default function WelcomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="הגיל שלך"
+              placeholderTextColor="#9ca3af"
               value={age}
               onChangeText={setAge}
               keyboardType="numeric"
@@ -81,6 +85,7 @@ export default function WelcomeScreen() {
             <TextInput
               style={styles.input}
               placeholder="מאיזו עיר אתה?"
+              placeholderTextColor="#9ca3af"
               value={city}
               onChangeText={setCity}
               textAlign="right"
@@ -88,10 +93,10 @@ export default function WelcomeScreen() {
 
             <Text style={styles.hint}>המידע שלך נשמר בצורה מאובטחת</Text>
 
-            <TouchableOpacity style={styles.button} onPress={handleContinue}>
+            <GradientButton onPress={handleContinue}>
               <Text style={styles.buttonText}>כניסה לאפליקציה</Text>
               <Ionicons name="arrow-back" size={20} color="#fff" />
-            </TouchableOpacity>
+            </GradientButton>
 
             <TouchableOpacity onPress={() => setStep(1)} style={styles.backLink}>
               <Text style={styles.backLinkText}>חזור</Text>
@@ -105,40 +110,37 @@ export default function WelcomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff7ed' },
+  container: { flex: 1, backgroundColor: '#0f0f1a' },
   scrollContent: { flexGrow: 1, padding: 24, justifyContent: 'center' },
   heroSection: { alignItems: 'center', marginBottom: 32 },
   logoCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#f97316',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    shadowColor: '#f97316',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    elevation: 8,
+    padding: 10,
+    shadowColor: '#7B61FF',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 30,
+    elevation: 10,
   },
-  logoEmoji: { fontSize: 48 },
-  appName: { fontSize: 32, fontWeight: 'bold', color: '#f97316', marginBottom: 4 },
+  appName: { fontSize: 32, fontWeight: 'bold', color: '#ffffff', marginBottom: 4 },
   tagline: { fontSize: 16, color: '#9ca3af' },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e2e',
     borderRadius: 20,
     padding: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.2,
     shadowRadius: 12,
     elevation: 4,
   },
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#ffffff',
     textAlign: 'right',
     marginBottom: 20,
   },
@@ -149,44 +151,34 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 16,
   },
-  featureText: { fontSize: 14, color: '#374151', textAlign: 'right', flex: 1 },
+  featureText: { fontSize: 14, color: '#d1d5db', textAlign: 'right', flex: 1 },
   featureIcon: {
-    backgroundColor: '#fff7ed',
+    backgroundColor: '#2a2a3c',
     borderRadius: 10,
     padding: 8,
   },
   label: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: '#d1d5db',
     marginBottom: 6,
     textAlign: 'right',
   },
   input: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#1e1e2e',
     borderRadius: 10,
     padding: 13,
     marginBottom: 14,
     fontSize: 15,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
-    color: '#1f2937',
+    borderColor: '#374151',
+    color: '#ffffff',
   },
   hint: {
     fontSize: 12,
     color: '#9ca3af',
     textAlign: 'center',
     marginBottom: 16,
-  },
-  button: {
-    backgroundColor: '#f97316',
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 4,
   },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   backLink: { alignItems: 'center', marginTop: 14 },

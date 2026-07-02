@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import GradientButton from '../components/GradientButton';
 
 export default function ClubsScreen() {
   const router = useRouter();
@@ -38,12 +40,17 @@ export default function ClubsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
+        <LinearGradient
+          colors={['#2CB7FF', '#7B61FF', '#D946EF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <TouchableOpacity onPress={() => router.back()}>
             <Text style={styles.backButton}>← חזור</Text>
           </TouchableOpacity>
           <Text style={styles.title}>מועדונים</Text>
-        </View>
+        </LinearGradient>
 
         <View style={styles.searchSection}>
           <Text style={styles.searchText}>🔍 חפש מועדונים לידך</Text>
@@ -69,9 +76,9 @@ export default function ClubsScreen() {
                 <Text style={styles.clubDetail}>🎵 {club.music}</Text>
               </View>
               
-              <TouchableOpacity style={styles.bookButton}>
+              <GradientButton onPress={() => {}} style={styles.bookButton}>
                 <Text style={styles.bookButtonText}>הזמן כרטיס</Text>
-              </TouchableOpacity>
+              </GradientButton>
             </View>
           ))}
         </View>
@@ -83,7 +90,7 @@ export default function ClubsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f0f1a',
   },
   scrollView: {
     flex: 1,
@@ -92,7 +99,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f97316',
   },
   backButton: {
     fontSize: 16,
@@ -106,13 +112,13 @@ const styles = StyleSheet.create({
   },
   searchSection: {
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e2e',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#374151',
   },
   searchText: {
     fontSize: 16,
-    color: '#9ca3af',
+    color: '#d1d5db',
   },
   section: {
     padding: 20,
@@ -120,15 +126,15 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#ffffff',
     marginBottom: 15,
   },
   clubCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e2e',
     borderRadius: 12,
     padding: 20,
     marginBottom: 15,
-    shadowColor: '#f97316',
+    shadowColor: '#7B61FF',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -143,7 +149,7 @@ const styles = StyleSheet.create({
   clubName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#ffffff',
   },
   statusBadge: {
     paddingHorizontal: 10,
@@ -163,7 +169,7 @@ const styles = StyleSheet.create({
   },
   clubLocation: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9ca3af',
     marginBottom: 10,
   },
   clubDetails: {
@@ -173,13 +179,11 @@ const styles = StyleSheet.create({
   },
   clubDetail: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#d1d5db',
   },
   bookButton: {
-    backgroundColor: '#f97316',
     borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
+    overflow: 'hidden',
   },
   bookButtonText: {
     color: '#fff',

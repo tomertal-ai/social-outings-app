@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Modal }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import WebView from 'react-native-webview';
 
 const clubs = [
   {
@@ -187,7 +188,12 @@ export default function MapScreen() {
       });
       L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map)
         .on('click', function() {
-          window.parent && window.parent.postMessage(JSON.stringify({clubId: ${c.id}}), '*');
+          var msg = JSON.stringify({clubId: ${c.id}});
+          if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(msg);
+          } else if (window.parent) {
+            window.parent.postMessage(msg, '*');
+          }
         });
     `).join('');
 
@@ -225,9 +231,9 @@ export default function MapScreen() {
     setMapCenter({ lat: club.latitude, lng: club.longitude, zoom: 15 });
   };
 
-  const handleMapMessage = (e: MessageEvent) => {
+  const handleMapMessage = (e: { data?: string }) => {
     try {
-      const data = JSON.parse(e.data);
+      const data = JSON.parse(e.data || '{}');
       if (data.clubId) {
         const club = clubs.find(c => c.id === data.clubId);
         if (club) focusClub(club);
@@ -269,9 +275,18 @@ export default function MapScreen() {
             }}
           />
         ) : (
-          <View style={styles.fallback}>
-            <Text style={styles.fallbackText}>המפה זמינה בדפדפן בלבד</Text>
-          </View>
+          <WebView
+            originWhitelist={['*']}
+            source={{ html: buildMapHtml(filtered, mapCenter.lat, mapCenter.lng, mapCenter.zoom), baseUrl: 'https://unpkg.com' }}
+            style={{ flex: 1 }}
+            onMessage={(e) => handleMapMessage(e.nativeEvent)}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            allowsInlineMediaPlayback={true}
+            allowFileAccess={true}
+            allowUniversalAccessFromFileURLs={true}
+            mixedContentMode="always"
+          />
         )}
       </View>
 
@@ -384,32 +399,32 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8, backgroundColor: '#1a1a2e' },
+  container: { flex: 1, backgroundColor: '#0f0f1a' },
+  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8, backgroundColor: '#0f0f1a' },
   title: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
   subtitle: { fontSize: 12, color: '#9ca3af', marginTop: 2 },
-  filterBar: { backgroundColor: '#1a1a2e', maxHeight: 48 },
+  filterBar: { backgroundColor: '#0f0f1a', maxHeight: 48 },
   filterBarContent: { paddingHorizontal: 16, paddingBottom: 10, gap: 8, flexDirection: 'row' },
   filterChip: { paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)' },
-  filterChipActive: { backgroundColor: '#f97316' },
+  filterChipActive: { backgroundColor: '#7B61FF' },
   filterChipText: { fontSize: 12, color: '#d1d5db', fontWeight: '600' },
   filterChipTextActive: { color: '#fff' },
   mapContainer: { flex: 1 },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   fallbackText: { color: '#9ca3af', fontSize: 15 },
-  chipBar: { maxHeight: 82, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#f3f4f6' },
+  chipBar: { maxHeight: 82, backgroundColor: '#0f0f1a', borderTopWidth: 1, borderTopColor: '#1e1e2e' },
   chipBarContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8, flexDirection: 'row' },
   clubChip: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#f9fafb', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8,
+    backgroundColor: '#1e1e2e', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8,
     borderWidth: 1.5, borderColor: 'transparent',
   },
   clubChipEmoji: { fontSize: 20 },
-  clubChipName: { fontSize: 13, fontWeight: 'bold', color: '#1f2937' },
+  clubChipName: { fontSize: 13, fontWeight: 'bold', color: '#ffffff' },
   clubChipCity: { fontSize: 11, color: '#9ca3af' },
   modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalSheet: {
-    backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: '#1e1e2e', borderTopLeftRadius: 24, borderTopRightRadius: 24,
     maxHeight: '80%', overflow: 'hidden',
   },
   modalColorBar: { height: 4, width: 40, borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 4 },
@@ -418,26 +433,26 @@ const styles = StyleSheet.create({
   closeBtn: { alignSelf: 'flex-end', padding: 4 },
   modalTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
   modalEmoji: { fontSize: 40 },
-  modalName: { fontSize: 24, fontWeight: 'bold', color: '#1a1a2e' },
-  modalCity: { fontSize: 14, color: '#6b7280', marginTop: 2 },
+  modalName: { fontSize: 24, fontWeight: 'bold', color: '#ffffff' },
+  modalCity: { fontSize: 14, color: '#9ca3af', marginTop: 2 },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   ratingStars: { fontSize: 16 },
-  ratingNum: { fontSize: 14, fontWeight: 'bold', color: '#374151' },
+  ratingNum: { fontSize: 14, fontWeight: 'bold', color: '#d1d5db' },
   infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   infoBox: {
-    flex: 1, minWidth: '28%', backgroundColor: '#f9fafb', borderRadius: 12,
+    flex: 1, minWidth: '28%', backgroundColor: '#0f0f1a', borderRadius: 12,
     padding: 12, alignItems: 'center', gap: 4,
   },
   infoLabel: { fontSize: 11, color: '#9ca3af', fontWeight: '600' },
-  infoVal: { fontSize: 13, color: '#1f2937', fontWeight: 'bold', textAlign: 'center' },
+  infoVal: { fontSize: 13, color: '#ffffff', fontWeight: 'bold', textAlign: 'center' },
   musicSection: { marginBottom: 14 },
   tagsSection: { marginBottom: 20 },
-  sectionLabel: { fontSize: 14, fontWeight: 'bold', color: '#374151', marginBottom: 8, textAlign: 'right' },
+  sectionLabel: { fontSize: 14, fontWeight: 'bold', color: '#d1d5db', marginBottom: 8, textAlign: 'right' },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   musicTag: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20, borderWidth: 1 },
   musicTagText: { fontSize: 13, fontWeight: '600' },
-  tag: { backgroundColor: '#f3f4f6', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
-  tagText: { fontSize: 12, color: '#374151' },
+  tag: { backgroundColor: '#0f0f1a', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
+  tagText: { fontSize: 12, color: '#d1d5db' },
   navBtn: {
     borderRadius: 14, paddingVertical: 14, flexDirection: 'row',
     alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 30,

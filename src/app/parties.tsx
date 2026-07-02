@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { LinearGradient } from 'expo-linear-gradient';
+import GradientButton from '../components/GradientButton';
 
 export default function PartiesScreen() {
   const router = useRouter();
@@ -33,12 +35,17 @@ export default function PartiesScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
-        <View style={styles.header}>
+        <LinearGradient
+          colors={['#2CB7FF', '#7B61FF', '#D946EF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.header}
+        >
           <TouchableOpacity onPress={() => router.back()}>
             <Text style={styles.backButton}>← חזור</Text>
           </TouchableOpacity>
           <Text style={styles.title}>מסיבות</Text>
-        </View>
+        </LinearGradient>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>צור מסיבה חדשה</Text>
@@ -46,6 +53,7 @@ export default function PartiesScreen() {
           <TextInput
             style={styles.input}
             placeholder="שם המסיבה"
+            placeholderTextColor="#9ca3af"
             value={partyTitle}
             onChangeText={setPartyTitle}
           />
@@ -53,6 +61,7 @@ export default function PartiesScreen() {
           <TextInput
             style={[styles.input, styles.textArea]}
             placeholder="תיאור המסיבה"
+            placeholderTextColor="#9ca3af"
             value={partyDescription}
             onChangeText={setPartyDescription}
             multiline
@@ -62,14 +71,15 @@ export default function PartiesScreen() {
           <TextInput
             style={styles.input}
             placeholder="מספר משתתפים מקסימלי"
+            placeholderTextColor="#9ca3af"
             value={maxAttendees}
             onChangeText={setMaxAttendees}
             keyboardType="numeric"
           />
           
-          <TouchableOpacity style={styles.button}>
+          <GradientButton onPress={() => {}}>
             <Text style={styles.buttonText}>צור מסיבה</Text>
-          </TouchableOpacity>
+          </GradientButton>
         </View>
 
         <View style={styles.section}>
@@ -102,7 +112,7 @@ export default function PartiesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0f0f1a',
   },
   scrollView: {
     flex: 1,
@@ -111,7 +121,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f97316',
   },
   backButton: {
     fontSize: 16,
@@ -129,27 +138,22 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#ffffff',
     marginBottom: 15,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e2e',
     borderRadius: 8,
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#374151',
+    color: '#ffffff',
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
-  },
-  button: {
-    backgroundColor: '#f97316',
-    borderRadius: 8,
-    padding: 15,
-    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
@@ -157,11 +161,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   partyCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1e1e2e',
     borderRadius: 12,
     padding: 20,
     marginBottom: 15,
-    shadowColor: '#f97316',
+    shadowColor: '#7B61FF',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -170,12 +174,12 @@ const styles = StyleSheet.create({
   partyTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: '#ffffff',
     marginBottom: 5,
   },
   partyDescription: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9ca3af',
     marginBottom: 10,
   },
   partyDetails: {
@@ -185,17 +189,17 @@ const styles = StyleSheet.create({
   },
   partyDetail: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#d1d5db',
   },
   attendees: {
     marginBottom: 15,
   },
   attendeesText: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#d1d5db',
   },
   joinButton: {
-    backgroundColor: '#10b981',
+    backgroundColor: '#7B61FF',
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',

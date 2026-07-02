@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 120 120">
+  <!-- White thick circular location pin with sharp bottom point and circular cutout -->
+  <path
+    d="M60 6 A48 48 0 1 1 32 96 Q46 112 60 124 Q74 112 92 96 A48 48 0 1 1 60 6 Z M60 22 A32 32 0 1 1 60 86 A32 32 0 1 1 60 22 Z"
+    fill="#ffffff"
+    fill-rule="evenodd"
+  />
+
+  <!-- Three white people circles centered at the bottom -->
+  <circle cx="50" cy="90.5" r="6.5" fill="#ffffff"/>
+  <circle cx="60" cy="93" r="6.5" fill="#ffffff"/>
+  <circle cx="70" cy="90.5" r="6.5" fill="#ffffff"/>
+</svg>
