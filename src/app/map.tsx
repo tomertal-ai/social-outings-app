@@ -217,15 +217,15 @@ export default function MapScreen() {
     const markersJs = clubList.map(c => `
       var icon${c.id} = L.divIcon({
         html: \`<div class="marker-root" id="marker-${c.id}" onclick="selectMarker(${c.id})">
-          <div class="marker-inner" style="border-color: ${c.color}; color: ${c.color};">
-            <div class="marker-icon">${c.image}</div>
-            <div class="marker-label">${c.name}</div>
+          <div class="marker-pill" style="border-color: rgba(123,97,255,0.35);">
+            <div class="marker-logo" style="background-color: ${c.color};">${c.name.charAt(0)}</div>
+            <div class="marker-name">${c.name}</div>
           </div>
           <div class="marker-dot" style="background:${c.color};"></div>
         </div>\`,
         className: '',
-        iconSize: [44, 52],
-        iconAnchor: [22, 52]
+        iconSize: [140, 52],
+        iconAnchor: [70, 52]
       });
       L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map);
     `).join('');
@@ -244,22 +244,31 @@ export default function MapScreen() {
     display: flex; flex-direction: column; align-items: center; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .marker-inner {
-    display: flex; flex-direction: row; align-items: center; justify-content: center;
-    height: 34px; width: 34px; border-radius: 17px;
-    background: rgba(16,16,28,0.95); border: 2px solid;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px currentColor;
+  .marker-pill {
+    display: flex; flex-direction: row; align-items: center;
+    height: 36px; max-width: 130px; border-radius: 18px;
+    background: rgba(16,16,28,0.95); border: 1.5px solid;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
     overflow: hidden;
-    transition: width 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), padding 0.25s ease, border-radius 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.25s ease, border-color 0.25s ease;
   }
-  .marker-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
-  .marker-label {
-    font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap;
-    max-width: 0; opacity: 0; margin-left: 0;
-    transition: max-width 0.25s ease, opacity 0.2s ease, margin-left 0.25s ease;
+  .marker-logo {
+    width: 28px; height: 28px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #fff;
+    margin-left: 4px; flex-shrink: 0;
   }
-  .marker-root.active .marker-inner { width: auto; padding: 0 12px; border-radius: 18px; }
-  .marker-root.active .marker-label { max-width: 120px; opacity: 1; margin-left: 6px; }
+  .marker-name {
+    font-size: 12px; font-weight: 700; color: #fff;
+    padding: 0 10px 0 7px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 90px;
+  }
+  .marker-root.active .marker-pill {
+    transform: scale(1.08);
+    border-color: #7B61FF;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 16px rgba(123,97,255,0.5);
+  }
   .marker-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 2px; box-shadow: 0 0 8px currentColor; }
   .leaflet-control-attribution { font-size:8px; opacity:0.3; color:#9ca3af; }
   .leaflet-control-attribution a { color:#9ca3af; }
