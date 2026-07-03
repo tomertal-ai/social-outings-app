@@ -260,6 +260,7 @@ export default function MapScreen() {
 <style>
   body { margin:0; padding:0; background:#0B0B14; }
   #map { width:100vw; height:100vh; }
+  .leaflet-tile-pane { filter: brightness(0.58) contrast(1.15) saturate(0.9); }
   .leaflet-control-attribution { font-size:8px; opacity:0.3; color:#9ca3af; }
   .leaflet-control-attribution a { color:#9ca3af; }
   .leaflet-control-zoom { border:none !important; box-shadow:0 4px 16px rgba(0,0,0,0.4) !important; border-radius:12px !important; overflow:hidden; }
@@ -271,7 +272,7 @@ export default function MapScreen() {
 <div id="map"></div>
 <script>
   var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '© CARTO', subdomains: 'abcd', maxZoom: 19
   }).addTo(map);
   ${markersJs}
