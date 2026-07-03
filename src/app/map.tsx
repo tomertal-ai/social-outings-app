@@ -3,6 +3,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import WebView from 'react-native-webview';
+import { LinearGradient } from 'expo-linear-gradient';
+import GradientButton from '../components/GradientButton';
 
 const clubs = [
   {
@@ -153,6 +155,55 @@ const clubs = [
 
 type Club = typeof clubs[0];
 
+function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  if (active) {
+    return (
+      <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+        <LinearGradient
+          colors={['#2CB7FF', '#7B61FF', '#D946EF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.filterChipGradient}
+        >
+          <Text style={styles.filterChipTextActive}>{label}</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    );
+  }
+  return (
+    <TouchableOpacity style={styles.filterChip} onPress={onPress} activeOpacity={0.7}>
+      <Text style={styles.filterChipText}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+function VenueCard({ club, selected, onPress }: { club: Club; selected: boolean; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      style={[
+        styles.venueCard,
+        selected && { borderColor: club.color, backgroundColor: club.color + '12' },
+      ]}
+      onPress={onPress}
+      activeOpacity={0.8}
+    >
+      <View style={[styles.venueIconWrap, { backgroundColor: club.color + '20', borderColor: club.color + '50' }]}>
+        <Text style={styles.venueIcon}>{club.image}</Text>
+      </View>
+      <View style={styles.venueInfo}>
+        <Text style={styles.venueName} numberOfLines={1}>{club.name}</Text>
+        <Text style={styles.venueCity}>{club.city}</Text>
+        <View style={styles.venueMeta}>
+          <Text style={[styles.venueRating, { color: club.color }]}>★ {club.rating}</Text>
+          <Text style={styles.venueDot}>•</Text>
+          <Text style={styles.venuePrice}>{club.entryPrice}</Text>
+        </View>
+      </View>
+      <Ionicons name="chevron-back" size={18} color="#6b7280" style={styles.venueArrow} />
+    </TouchableOpacity>
+  );
+}
+
 export default function MapScreen() {
   const webViewRef = useRef<any>(null);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
@@ -167,24 +218,27 @@ export default function MapScreen() {
       var icon${c.id} = L.divIcon({
         html: \`<div onclick="window.parent.postMessage('${c.id}','*')" style="
           display:flex;flex-direction:column;align-items:center;cursor:pointer;
+          filter: drop-shadow(0 6px 16px rgba(0,0,0,0.55));
         ">
           <div style="
-            background:${c.color};color:white;font-size:11px;font-weight:bold;
-            padding:3px 9px;border-radius:12px;margin-bottom:4px;
-            box-shadow:0 2px 8px rgba(0,0,0,0.25);white-space:nowrap;
-          ">${c.name}</div>
-          <div style="
-            width:46px;height:46px;border-radius:50%;
-            background:white;border:3px solid ${c.color};
-            box-shadow:0 3px 10px rgba(0,0,0,0.2);
-            display:flex;align-items:center;justify-content:center;
-            font-size:22px;
-          ">${c.image}</div>
-          <div style="width:2px;height:8px;background:${c.color};margin-top:2px;border-radius:2px;"></div>
+            background:rgba(16,16,28,0.92);
+            border:1.5px solid ${c.color}60;
+            border-radius:18px;
+            padding:7px 13px;
+            margin-bottom:3px;
+            display:flex;align-items:center;gap:7px;
+            white-space:nowrap;
+            backdrop-filter:blur(8px);
+          ">
+            <span style="font-size:18px">${c.image}</span>
+            <span style="color:#ffffff;font-size:12px;font-weight:700;letter-spacing:0.2px;">${c.name}</span>
+          </div>
+          <div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid rgba(16,16,28,0.92);"></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:${c.color};box-shadow:0 0 12px ${c.color};margin-top:1px;"></div>
         </div>\`,
         className: '',
-        iconSize: [80, 75],
-        iconAnchor: [40, 75]
+        iconSize: [100, 80],
+        iconAnchor: [50, 80]
       });
       L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map)
         .on('click', function() {
@@ -204,20 +258,20 @@ export default function MapScreen() {
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-  body { margin:0; padding:0; }
+  body { margin:0; padding:0; background:#0B0B14; }
   #map { width:100vw; height:100vh; }
-  .leaflet-control-attribution { font-size:9px; opacity:0.4; }
-  .leaflet-control-zoom { border:none !important; box-shadow:0 2px 8px rgba(0,0,0,0.12) !important; border-radius:12px !important; overflow:hidden; }
-  .leaflet-control-zoom a { color:#374151 !important; font-weight:bold !important; }
-  .leaflet-popup-content-wrapper { border-radius:14px !important; box-shadow:0 4px 20px rgba(0,0,0,0.15) !important; }
-  .leaflet-popup-tip { display:none; }
+  .leaflet-control-attribution { font-size:8px; opacity:0.3; color:#9ca3af; }
+  .leaflet-control-attribution a { color:#9ca3af; }
+  .leaflet-control-zoom { border:none !important; box-shadow:0 4px 16px rgba(0,0,0,0.4) !important; border-radius:12px !important; overflow:hidden; }
+  .leaflet-control-zoom a { color:#fff !important; background:rgba(16,16,28,0.9) !important; font-weight:bold !important; border-color:rgba(255,255,255,0.08) !important; }
+  .leaflet-control-zoom a:hover { background:rgba(42,42,60,0.9) !important; }
 </style>
 </head>
 <body>
 <div id="map"></div>
 <script>
   var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
     attribution: '© CARTO', subdomains: 'abcd', maxZoom: 19
   }).addTo(map);
   ${markersJs}
@@ -243,21 +297,28 @@ export default function MapScreen() {
 
   const stars = (r: number) => '★'.repeat(Math.round(r)) + '☆'.repeat(5 - Math.round(r));
 
+  const resetMap = () => {
+    setFilterCity(null);
+    setSelectedClub(null);
+    setMapCenter({ lat: 32.0, lng: 34.85, zoom: 8 });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>🗺️ מועדונים בישראל</Text>
-        <Text style={styles.subtitle}>{filtered.length} מועדונים</Text>
+        <View>
+          <Text style={styles.title}>מועדונים בישראל</Text>
+          <Text style={styles.subtitle}>{filtered.length} מקומות בילוי</Text>
+        </View>
+        <TouchableOpacity style={styles.iconBtn} activeOpacity={0.7}>
+          <Ionicons name="options-outline" size={20} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar} contentContainerStyle={styles.filterBarContent}>
-        <TouchableOpacity style={[styles.filterChip, !filterCity && styles.filterChipActive]} onPress={() => { setFilterCity(null); setMapCenter({ lat: 32.0, lng: 34.85, zoom: 8 }); }}>
-          <Text style={[styles.filterChipText, !filterCity && styles.filterChipTextActive]}>הכל</Text>
-        </TouchableOpacity>
+        <FilterChip label="הכל" active={!filterCity} onPress={resetMap} />
         {cities.map(city => (
-          <TouchableOpacity key={city} style={[styles.filterChip, filterCity === city && styles.filterChipActive]} onPress={() => { setFilterCity(city); }}>
-            <Text style={[styles.filterChipText, filterCity === city && styles.filterChipTextActive]}>{city}</Text>
-          </TouchableOpacity>
+          <FilterChip key={city} label={city} active={filterCity === city} onPress={() => setFilterCity(city)} />
         ))}
       </ScrollView>
 
@@ -288,86 +349,74 @@ export default function MapScreen() {
             mixedContentMode="always"
           />
         )}
+        <TouchableOpacity style={styles.recenterBtn} onPress={resetMap} activeOpacity={0.7}>
+          <Ionicons name="locate" size={20} color="#fff" />
+        </TouchableOpacity>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipBar} contentContainerStyle={styles.chipBarContent}>
-        {filtered.map(club => (
-          <TouchableOpacity
-            key={club.id}
-            style={[styles.clubChip, selectedClub?.id === club.id && { borderColor: club.color, backgroundColor: club.color + '15' }]}
-            onPress={() => focusClub(club)}
-          >
-            <Text style={styles.clubChipEmoji}>{club.image}</Text>
-            <View>
-              <Text style={[styles.clubChipName, selectedClub?.id === club.id && { color: club.color }]}>{club.name}</Text>
-              <Text style={styles.clubChipCity}>{club.city}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={styles.bottomPanel}>
+        <View style={styles.bottomHandle} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardsContent}>
+          {filtered.map(club => (
+            <VenueCard key={club.id} club={club} selected={selectedClub?.id === club.id} onPress={() => focusClub(club)} />
+          ))}
+        </ScrollView>
+      </View>
 
       {selectedClub && (
         <Modal transparent animationType="slide" visible={!!selectedClub} onRequestClose={() => setSelectedClub(null)}>
           <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setSelectedClub(null)}>
             <View style={styles.modalSheet}>
-              <View style={[styles.modalColorBar, { backgroundColor: selectedClub.color }]} />
+              <View style={styles.modalHandle} />
 
               <ScrollView showsVerticalScrollIndicator={false} style={styles.modalScroll}>
                 <View style={styles.modalHeader}>
                   <TouchableOpacity onPress={() => setSelectedClub(null)} style={styles.closeBtn}>
-                    <Ionicons name="close" size={22} color="#6b7280" />
+                    <Ionicons name="close" size={22} color="#9ca3af" />
                   </TouchableOpacity>
+
                   <View style={styles.modalTitleRow}>
                     <View>
                       <Text style={styles.modalName}>{selectedClub.name}</Text>
-                      <Text style={styles.modalCity}>{selectedClub.city}</Text>
+                      <View style={styles.modalLocationRow}>
+                        <Ionicons name="location-sharp" size={14} color={selectedClub.color} />
+                        <Text style={styles.modalCity}>{selectedClub.city}</Text>
+                      </View>
                     </View>
-                    <Text style={styles.modalEmoji}>{selectedClub.image}</Text>
+                    <View style={[styles.modalEmojiWrap, { backgroundColor: selectedClub.color + '20', borderColor: selectedClub.color + '50' }]}>
+                      <Text style={styles.modalEmoji}>{selectedClub.image}</Text>
+                    </View>
                   </View>
+
                   <View style={styles.ratingRow}>
                     <Text style={[styles.ratingStars, { color: selectedClub.color }]}>{stars(selectedClub.rating)}</Text>
                     <Text style={styles.ratingNum}>{selectedClub.rating}</Text>
+                    <Text style={styles.ratingCount}>• {selectedClub.capacity} איש</Text>
                   </View>
                 </View>
 
                 <View style={styles.infoGrid}>
-                  <View style={styles.infoBox}>
-                    <Ionicons name="location-outline" size={18} color={selectedClub.color} />
-                    <Text style={styles.infoLabel}>כתובת</Text>
-                    <Text style={styles.infoVal}>{selectedClub.address}</Text>
-                  </View>
-                  <View style={styles.infoBox}>
-                    <Ionicons name="time-outline" size={18} color={selectedClub.color} />
-                    <Text style={styles.infoLabel}>שעות</Text>
-                    <Text style={styles.infoVal}>{selectedClub.hours}</Text>
-                  </View>
-                  <View style={styles.infoBox}>
-                    <Ionicons name="calendar-outline" size={18} color={selectedClub.color} />
-                    <Text style={styles.infoLabel}>ימים</Text>
-                    <Text style={styles.infoVal}>{selectedClub.openDays}</Text>
-                  </View>
-                  <View style={styles.infoBox}>
-                    <Ionicons name="cash-outline" size={18} color={selectedClub.color} />
-                    <Text style={styles.infoLabel}>כניסה</Text>
-                    <Text style={styles.infoVal}>{selectedClub.entryPrice}</Text>
-                  </View>
-                  <View style={styles.infoBox}>
-                    <Ionicons name="person-outline" size={18} color={selectedClub.color} />
-                    <Text style={styles.infoLabel}>גיל מינ׳</Text>
-                    <Text style={styles.infoVal}>{selectedClub.minAge}+</Text>
-                  </View>
-                  <View style={styles.infoBox}>
-                    <Ionicons name="people-outline" size={18} color={selectedClub.color} />
-                    <Text style={styles.infoLabel}>קיבולת</Text>
-                    <Text style={styles.infoVal}>{selectedClub.capacity}</Text>
-                  </View>
+                  {[
+                    { icon: 'time-outline', label: 'שעות', val: selectedClub.hours },
+                    { icon: 'calendar-outline', label: 'ימים', val: selectedClub.openDays },
+                    { icon: 'cash-outline', label: 'כניסה', val: selectedClub.entryPrice },
+                    { icon: 'person-outline', label: 'גיל מינ׳', val: selectedClub.minAge + '+' },
+                    { icon: 'location-outline', label: 'כתובת', val: selectedClub.address },
+                    { icon: 'musical-notes-outline', label: 'מוזיקה', val: selectedClub.music.join(', ') },
+                  ].map((item, idx) => (
+                    <View key={idx} style={styles.infoBox}>
+                      <Ionicons name={item.icon as any} size={18} color={selectedClub.color} />
+                      <Text style={styles.infoLabel}>{item.label}</Text>
+                      <Text style={styles.infoVal}>{item.val}</Text>
+                    </View>
+                  ))}
                 </View>
 
                 <View style={styles.musicSection}>
                   <Text style={styles.sectionLabel}>סוגי מוזיקה</Text>
                   <View style={styles.tagsRow}>
                     {selectedClub.music.map(m => (
-                      <View key={m} style={[styles.musicTag, { backgroundColor: selectedClub.color + '20', borderColor: selectedClub.color + '40' }]}>
+                      <View key={m} style={[styles.musicTag, { backgroundColor: selectedClub.color + '16', borderColor: selectedClub.color + '40' }]}>
                         <Text style={[styles.musicTagText, { color: selectedClub.color }]}>{m}</Text>
                       </View>
                     ))}
@@ -385,10 +434,10 @@ export default function MapScreen() {
                   </View>
                 </View>
 
-                <TouchableOpacity style={[styles.navBtn, { backgroundColor: selectedClub.color }]}>
+                <GradientButton onPress={() => {}}>
                   <Ionicons name="navigate" size={18} color="#fff" />
                   <Text style={styles.navBtnText}>נווט למועדון</Text>
-                </TouchableOpacity>
+                </GradientButton>
               </ScrollView>
             </View>
           </TouchableOpacity>
@@ -399,63 +448,115 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f1a' },
-  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8, backgroundColor: '#0f0f1a' },
-  title: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-  subtitle: { fontSize: 12, color: '#9ca3af', marginTop: 2 },
-  filterBar: { backgroundColor: '#0f0f1a', maxHeight: 48 },
-  filterBarContent: { paddingHorizontal: 16, paddingBottom: 10, gap: 8, flexDirection: 'row' },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 5, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.1)' },
-  filterChipActive: { backgroundColor: '#7B61FF' },
-  filterChipText: { fontSize: 12, color: '#d1d5db', fontWeight: '600' },
-  filterChipTextActive: { color: '#fff' },
-  mapContainer: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#0B0B14' },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10,
+  },
+  title: { fontSize: 24, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
+  subtitle: { fontSize: 13, color: '#9ca3af', marginTop: 3 },
+  iconBtn: {
+    width: 40, height: 40, borderRadius: 12, backgroundColor: '#161622',
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: '#2A2A3C',
+  },
+  filterBar: { maxHeight: 56, backgroundColor: '#0B0B14' },
+  filterBarContent: { paddingHorizontal: 16, paddingVertical: 8, gap: 10, flexDirection: 'row' },
+  filterChip: {
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24,
+    backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
+  },
+  filterChipGradient: {
+    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 24,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  filterChipText: { fontSize: 13, color: '#9ca3af', fontWeight: '600' },
+  filterChipTextActive: { fontSize: 13, color: '#fff', fontWeight: '700' },
+  mapContainer: { flex: 1, overflow: 'hidden' },
   fallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   fallbackText: { color: '#9ca3af', fontSize: 15 },
-  chipBar: { maxHeight: 82, backgroundColor: '#0f0f1a', borderTopWidth: 1, borderTopColor: '#1e1e2e' },
-  chipBarContent: { paddingHorizontal: 12, paddingVertical: 10, gap: 8, flexDirection: 'row' },
-  clubChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: '#1e1e2e', borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8,
-    borderWidth: 1.5, borderColor: 'transparent',
+  recenterBtn: {
+    position: 'absolute', right: 16, bottom: 16,
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: '#161622', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: '#2A2A3C',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.4, shadowRadius: 10,
+    elevation: 8,
   },
-  clubChipEmoji: { fontSize: 20 },
-  clubChipName: { fontSize: 13, fontWeight: 'bold', color: '#ffffff' },
-  clubChipCity: { fontSize: 11, color: '#9ca3af' },
-  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+  bottomPanel: {
+    backgroundColor: '#0B0B14',
+    borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    paddingTop: 12, paddingBottom: 16,
+    shadowColor: '#000', shadowOffset: { width: 0, height: -6 }, shadowOpacity: 0.5, shadowRadius: 20,
+    elevation: 16,
+  },
+  bottomHandle: {
+    width: 36, height: 4, borderRadius: 2, backgroundColor: '#2A2A3C',
+    alignSelf: 'center', marginBottom: 12,
+  },
+  cardsContent: { paddingHorizontal: 16, gap: 10, flexDirection: 'row' },
+  venueCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    width: 260, backgroundColor: '#161622', borderRadius: 20,
+    padding: 12, borderWidth: 1.5, borderColor: 'transparent',
+  },
+  venueIconWrap: {
+    width: 52, height: 52, borderRadius: 16,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1,
+  },
+  venueIcon: { fontSize: 26 },
+  venueInfo: { flex: 1, justifyContent: 'center' },
+  venueName: { fontSize: 15, fontWeight: '700', color: '#fff', marginBottom: 3 },
+  venueCity: { fontSize: 12, color: '#9ca3af', marginBottom: 6 },
+  venueMeta: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  venueRating: { fontSize: 12, fontWeight: '700' },
+  venueDot: { fontSize: 12, color: '#6b7280' },
+  venuePrice: { fontSize: 12, color: '#d1d5db', fontWeight: '600' },
+  venueArrow: { marginLeft: 4 },
+  modalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.6)' },
   modalSheet: {
-    backgroundColor: '#1e1e2e', borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    maxHeight: '80%', overflow: 'hidden',
+    backgroundColor: '#161622', borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    maxHeight: '85%', overflow: 'hidden',
   },
-  modalColorBar: { height: 4, width: 40, borderRadius: 2, alignSelf: 'center', marginTop: 10, marginBottom: 4 },
-  modalScroll: { paddingHorizontal: 20, paddingBottom: 30 },
-  modalHeader: { paddingTop: 8, paddingBottom: 16 },
-  closeBtn: { alignSelf: 'flex-end', padding: 4 },
-  modalTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  modalEmoji: { fontSize: 40 },
-  modalName: { fontSize: 24, fontWeight: 'bold', color: '#ffffff' },
-  modalCity: { fontSize: 14, color: '#9ca3af', marginTop: 2 },
+  modalHandle: {
+    width: 40, height: 5, borderRadius: 3, backgroundColor: '#2A2A3C',
+    alignSelf: 'center', marginTop: 12, marginBottom: 6,
+  },
+  modalScroll: { paddingHorizontal: 22, paddingBottom: 34 },
+  modalHeader: { paddingTop: 6, paddingBottom: 18 },
+  closeBtn: {
+    alignSelf: 'flex-end', width: 32, height: 32, borderRadius: 10,
+    backgroundColor: '#0B0B14', alignItems: 'center', justifyContent: 'center',
+  },
+  modalTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  modalEmojiWrap: {
+    width: 56, height: 56, borderRadius: 18,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 1,
+  },
+  modalEmoji: { fontSize: 32 },
+  modalName: { fontSize: 26, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
+  modalLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
+  modalCity: { fontSize: 14, color: '#9ca3af', fontWeight: '600' },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  ratingStars: { fontSize: 16 },
-  ratingNum: { fontSize: 14, fontWeight: 'bold', color: '#d1d5db' },
-  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
+  ratingStars: { fontSize: 15 },
+  ratingNum: { fontSize: 15, fontWeight: '800', color: '#fff' },
+  ratingCount: { fontSize: 13, color: '#9ca3af', marginRight: 4 },
+  infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
   infoBox: {
-    flex: 1, minWidth: '28%', backgroundColor: '#0f0f1a', borderRadius: 12,
-    padding: 12, alignItems: 'center', gap: 4,
+    flex: 1, minWidth: '28%', backgroundColor: '#0B0B14', borderRadius: 16,
+    padding: 14, alignItems: 'center', gap: 6,
+    borderWidth: 1, borderColor: '#2A2A3C',
   },
   infoLabel: { fontSize: 11, color: '#9ca3af', fontWeight: '600' },
-  infoVal: { fontSize: 13, color: '#ffffff', fontWeight: 'bold', textAlign: 'center' },
-  musicSection: { marginBottom: 14 },
-  tagsSection: { marginBottom: 20 },
-  sectionLabel: { fontSize: 14, fontWeight: 'bold', color: '#d1d5db', marginBottom: 8, textAlign: 'right' },
+  infoVal: { fontSize: 12, color: '#fff', fontWeight: '700', textAlign: 'center' },
+  musicSection: { marginBottom: 18 },
+  tagsSection: { marginBottom: 24 },
+  sectionLabel: { fontSize: 14, fontWeight: '700', color: '#d1d5db', marginBottom: 10, textAlign: 'right' },
   tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   musicTag: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20, borderWidth: 1 },
   musicTagText: { fontSize: 13, fontWeight: '600' },
-  tag: { backgroundColor: '#0f0f1a', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20 },
-  tagText: { fontSize: 12, color: '#d1d5db' },
-  navBtn: {
-    borderRadius: 14, paddingVertical: 14, flexDirection: 'row',
-    alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 30,
-  },
-  navBtnText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  tag: { backgroundColor: '#0B0B14', paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20, borderWidth: 1, borderColor: '#2A2A3C' },
+  tagText: { fontSize: 12, color: '#d1d5db', fontWeight: '500' },
+  navBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
