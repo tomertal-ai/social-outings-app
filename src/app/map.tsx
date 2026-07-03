@@ -110,7 +110,9 @@ export default function MapScreen() {
         iconSize: [150, 40],
         iconAnchor: [75, 20]
       });
-      L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map);
+      var marker${c.id} = L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} });
+      marker${c.id}.on('click', function(e) { e.originalEvent.stopPropagation(); selectMarker(${c.id}); });
+      markers.addLayer(marker${c.id});
     `}).join('');
 
     return `<!DOCTYPE html>
@@ -119,10 +121,15 @@ export default function MapScreen() {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <style>
   body { margin:0; padding:0; background:#0B0B14; }
   #map { width:100vw; height:100vh; }
   .leaflet-tile-pane { filter: contrast(1.05) saturate(1.05) brightness(0.95); }
+  .marker-cluster { background: rgba(123,97,255,0.5); border-radius: 50%; }
+  .marker-cluster div { background: rgba(16,16,28,0.95); color: #fff; border-radius: 50%; font-weight: 700; border: 1px solid rgba(123,97,255,0.6); }
   .marker-root {
     display: flex; align-items: center; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
@@ -185,6 +192,14 @@ export default function MapScreen() {
     }
   }
 
+  var markers = L.markerClusterGroup({
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true,
+    spiderfyOnMaxZoom: true,
+    maxClusterRadius: 50,
+    disableClusteringAtZoom: 17
+  });
+
   map.on('click', function(e) {
     if (!e.originalEvent || !e.originalEvent.target.closest('.marker-root')) {
       document.querySelectorAll('.marker-root').forEach(function(el) { el.classList.remove('active'); });
@@ -192,6 +207,7 @@ export default function MapScreen() {
   });
 
   ${markersJs}
+  map.addLayer(markers);
 </script>
 </body>
 </html>`;
