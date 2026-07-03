@@ -216,39 +216,18 @@ export default function MapScreen() {
   const buildMapHtml = (clubList: Club[], centerLat: number, centerLng: number, zoom: number) => {
     const markersJs = clubList.map(c => `
       var icon${c.id} = L.divIcon({
-        html: \`<div onclick="window.parent.postMessage('${c.id}','*')" style="
-          display:flex;flex-direction:column;align-items:center;cursor:pointer;
-          filter: drop-shadow(0 6px 16px rgba(0,0,0,0.55));
-        ">
-          <div style="
-            background:rgba(16,16,28,0.92);
-            border:1.5px solid ${c.color}60;
-            border-radius:18px;
-            padding:7px 13px;
-            margin-bottom:3px;
-            display:flex;align-items:center;gap:7px;
-            white-space:nowrap;
-            backdrop-filter:blur(8px);
-          ">
-            <span style="font-size:18px">${c.image}</span>
-            <span style="color:#ffffff;font-size:12px;font-weight:700;letter-spacing:0.2px;">${c.name}</span>
+        html: \`<div class="marker-root" id="marker-${c.id}" onclick="selectMarker(${c.id})">
+          <div class="marker-inner" style="border-color: ${c.color}; color: ${c.color};">
+            <div class="marker-icon">${c.image}</div>
+            <div class="marker-label">${c.name}</div>
           </div>
-          <div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:9px solid rgba(16,16,28,0.92);"></div>
-          <div style="width:8px;height:8px;border-radius:50%;background:${c.color};box-shadow:0 0 12px ${c.color};margin-top:1px;"></div>
+          <div class="marker-dot" style="background:${c.color};"></div>
         </div>\`,
         className: '',
-        iconSize: [100, 80],
-        iconAnchor: [50, 80]
+        iconSize: [44, 52],
+        iconAnchor: [22, 52]
       });
-      L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map)
-        .on('click', function() {
-          var msg = JSON.stringify({clubId: ${c.id}});
-          if (window.ReactNativeWebView) {
-            window.ReactNativeWebView.postMessage(msg);
-          } else if (window.parent) {
-            window.parent.postMessage(msg, '*');
-          }
-        });
+      L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map);
     `).join('');
 
     return `<!DOCTYPE html>
@@ -261,6 +240,27 @@ export default function MapScreen() {
   body { margin:0; padding:0; background:#0B0B14; }
   #map { width:100vw; height:100vh; }
   .leaflet-tile-pane { filter: contrast(1.05) saturate(1.05) brightness(0.95); }
+  .marker-root {
+    display: flex; flex-direction: column; align-items: center; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .marker-inner {
+    display: flex; flex-direction: row; align-items: center; justify-content: center;
+    height: 34px; width: 34px; border-radius: 17px;
+    background: rgba(16,16,28,0.95); border: 2px solid;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 10px currentColor;
+    overflow: hidden;
+    transition: width 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), padding 0.25s ease, border-radius 0.25s ease;
+  }
+  .marker-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+  .marker-label {
+    font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap;
+    max-width: 0; opacity: 0; margin-left: 0;
+    transition: max-width 0.25s ease, opacity 0.2s ease, margin-left 0.25s ease;
+  }
+  .marker-root.active .marker-inner { width: auto; padding: 0 12px; border-radius: 18px; }
+  .marker-root.active .marker-label { max-width: 120px; opacity: 1; margin-left: 6px; }
+  .marker-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 2px; box-shadow: 0 0 8px currentColor; }
   .leaflet-control-attribution { font-size:8px; opacity:0.3; color:#9ca3af; }
   .leaflet-control-attribution a { color:#9ca3af; }
   .leaflet-control-zoom { border:none !important; box-shadow:0 4px 16px rgba(0,0,0,0.4) !important; border-radius:12px !important; overflow:hidden; }
@@ -275,6 +275,25 @@ export default function MapScreen() {
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
     attribution: '© Esri', maxZoom: 18
   }).addTo(map);
+
+  function selectMarker(id) {
+    document.querySelectorAll('.marker-root').forEach(function(el) { el.classList.remove('active'); });
+    var el = document.getElementById('marker-' + id);
+    if (el) el.classList.add('active');
+    var msg = JSON.stringify({clubId: id});
+    if (window.ReactNativeWebView) {
+      window.ReactNativeWebView.postMessage(msg);
+    } else if (window.parent) {
+      window.parent.postMessage(msg, '*');
+    }
+  }
+
+  map.on('click', function(e) {
+    if (!e.originalEvent || !e.originalEvent.target.closest('.marker-root')) {
+      document.querySelectorAll('.marker-root').forEach(function(el) { el.classList.remove('active'); });
+    }
+  });
+
   ${markersJs}
 </script>
 </body>
