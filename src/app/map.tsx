@@ -1,159 +1,13 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Modal } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Platform, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import WebView from 'react-native-webview';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientButton from '../components/GradientButton';
+import { venues, Venue, getVenueLogo } from '../data/venues';
 
-const clubs = [
-  {
-    id: 1,
-    name: 'The Block',
-    city: 'תל אביב',
-    address: 'רחוב האלוף דוד 157, תל אביב',
-    latitude: 32.0538,
-    longitude: 34.7620,
-    music: ['טכנו', 'האוס'],
-    minAge: 21,
-    entryPrice: '₪60-120',
-    capacity: 800,
-    rating: 4.7,
-    openDays: 'ה׳-ש׳',
-    hours: '23:00 - 06:00',
-    image: '🎵',
-    color: '#7c3aed',
-    tags: ['LGBTQ+ Friendly', 'DJ בינלאומי', 'תאורה מתקדמת'],
-  },
-  {
-    id: 2,
-    name: 'Haoman 17',
-    city: 'ירושלים',
-    address: 'רחוב האומן 17, ירושלים',
-    latitude: 31.7857,
-    longitude: 35.2007,
-    music: ['טכנו', 'פסיכדלי', 'ד"ב'],
-    minAge: 18,
-    entryPrice: '₪80-150',
-    capacity: 3000,
-    rating: 4.5,
-    openDays: 'ש׳',
-    hours: '23:30 - 07:00',
-    image: '🔊',
-    color: '#dc2626',
-    tags: ['הגדול בישראל', 'DJ עולמי', 'גן חיצוני'],
-  },
-  {
-    id: 3,
-    name: 'Alphabet',
-    city: 'תל אביב',
-    address: 'רחוב ליליענבלום 40, תל אביב',
-    latitude: 32.0637,
-    longitude: 34.7710,
-    music: ['האוס', 'דיסקו', 'פופ'],
-    minAge: 23,
-    entryPrice: '₪50-100',
-    capacity: 400,
-    rating: 4.3,
-    openDays: 'ד׳-ש׳',
-    hours: '22:00 - 05:00',
-    image: '🍸',
-    color: '#f59e0b',
-    tags: ['בר + קלאב', 'קוקטיילים', 'וי"פ'],
-  },
-  {
-    id: 4,
-    name: 'Gärten',
-    city: 'תל אביב',
-    address: 'שדרות רוטשילד 43, תל אביב',
-    latitude: 32.0634,
-    longitude: 34.7742,
-    music: ['טכנו', 'מינימל'],
-    minAge: 21,
-    entryPrice: '₪60-90',
-    capacity: 250,
-    rating: 4.6,
-    openDays: 'ה׳-ש׳',
-    hours: '23:00 - 06:00',
-    image: '🌿',
-    color: '#059669',
-    tags: ['גן פתוח', 'אווירה ברלינית', 'בר'],
-  },
-  {
-    id: 5,
-    name: 'Club One',
-    city: 'חיפה',
-    address: 'שדרות בן גוריון 1, חיפה',
-    latitude: 32.8156,
-    longitude: 34.9895,
-    music: ['R&B', 'היפ הופ', 'פופ'],
-    minAge: 18,
-    entryPrice: '₪40-80',
-    capacity: 600,
-    rating: 4.1,
-    openDays: 'ה׳-ש׳',
-    hours: '22:30 - 05:00',
-    image: '🎤',
-    color: '#0ea5e9',
-    tags: ['R&B Night', 'VIP Lounge', 'פלור גדול'],
-  },
-  {
-    id: 6,
-    name: 'Nana',
-    city: 'תל אביב',
-    address: 'רחוב הרברט סמואל 1, תל אביב',
-    latitude: 32.0604,
-    longitude: 34.7649,
-    music: ['קומרשיאל', 'פופ', 'לטינו'],
-    minAge: 21,
-    entryPrice: '₪60-120',
-    capacity: 500,
-    rating: 4.0,
-    openDays: 'ד׳-ש׳',
-    hours: '22:00 - 05:00',
-    image: '🌊',
-    color: '#f97316',
-    tags: ['נוף לים', 'טרסה', 'DJ מקומי'],
-  },
-  {
-    id: 7,
-    name: 'Roxanne',
-    city: 'באר שבע',
-    address: 'רחוב הנשיא 12, באר שבע',
-    latitude: 31.2518,
-    longitude: 34.7913,
-    music: ['פופ', 'רוק', 'אלקטרו'],
-    minAge: 18,
-    entryPrice: '₪30-60',
-    capacity: 350,
-    rating: 3.9,
-    openDays: 'ה׳-ש׳',
-    hours: '21:00 - 04:00',
-    image: '🎸',
-    color: '#ec4899',
-    tags: ['דרום ישראל', 'סטודנטים', 'אווירה כיפית'],
-  },
-  {
-    id: 8,
-    name: 'Comfort 13',
-    city: 'תל אביב',
-    address: 'רחוב ויצמן 13, תל אביב',
-    latitude: 32.0847,
-    longitude: 34.7853,
-    music: ['אינדי', 'אלטרנטיב', 'רוק'],
-    minAge: 18,
-    entryPrice: '₪40-70',
-    capacity: 300,
-    rating: 4.4,
-    openDays: 'ג׳-ש׳',
-    hours: '20:00 - 03:00',
-    image: '🎶',
-    color: '#6366f1',
-    tags: ['הופעות חיות', 'בר', 'אווירה אינדי'],
-  },
-];
-
-type Club = typeof clubs[0];
+type Club = Venue;
 
 function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   if (active) {
@@ -187,8 +41,8 @@ function VenueCard({ club, selected, onPress }: { club: Club; selected: boolean;
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={[styles.venueIconWrap, { backgroundColor: club.color + '20', borderColor: club.color + '50' }]}>
-        <Text style={styles.venueIcon}>{club.image}</Text>
+      <View style={[styles.venueLogoWrap, { backgroundColor: club.color + '20', borderColor: club.color + '50' }]}>
+        <Image source={getVenueLogo(club)} style={styles.venueLogo} resizeMode="cover" />
       </View>
       <View style={styles.venueInfo}>
         <Text style={styles.venueName} numberOfLines={1}>{club.name}</Text>
@@ -196,7 +50,7 @@ function VenueCard({ club, selected, onPress }: { club: Club; selected: boolean;
         <View style={styles.venueMeta}>
           <Text style={[styles.venueRating, { color: club.color }]}>★ {club.rating}</Text>
           <Text style={styles.venueDot}>•</Text>
-          <Text style={styles.venuePrice}>{club.entryPrice}</Text>
+          <Text style={styles.venuePrice}>{club.priceRange}</Text>
         </View>
       </View>
       <Ionicons name="chevron-back" size={18} color="#6b7280" style={styles.venueArrow} />
@@ -210,15 +64,29 @@ export default function MapScreen() {
   const [mapCenter, setMapCenter] = useState({ lat: 32.0, lng: 34.85, zoom: 8 });
   const [filterCity, setFilterCity] = useState<string | null>(null);
 
-  const cities = [...new Set(clubs.map(c => c.city))];
-  const filtered = filterCity ? clubs.filter(c => c.city === filterCity) : clubs;
+  const cities = [...new Set(venues.map(c => c.city))];
+  const filtered = filterCity ? venues.filter(c => c.city === filterCity) : venues;
 
   const buildMapHtml = (clubList: Club[], centerLat: number, centerLng: number, zoom: number) => {
-    const markersJs = clubList.map(c => `
+    const placeholderSvg = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><rect width="28" height="28" rx="8" fill="%237B61FF"/><circle cx="14" cy="14" r="8" fill="%23D946EF"/></svg>`);
+
+    const getLogoUri = (venue: Club) => {
+      if (Platform.OS === 'web') return placeholderSvg;
+      try {
+        const source = getVenueLogo(venue);
+        return Image.resolveAssetSource(source).uri || placeholderSvg;
+      } catch {
+        return placeholderSvg;
+      }
+    };
+
+    const markersJs = clubList.map(c => {
+      const logoUri = getLogoUri(c);
+      return `
       var icon${c.id} = L.divIcon({
         html: \`<div class="marker-root" id="marker-${c.id}" onclick="selectMarker(${c.id})">
           <div class="marker-pill" style="border-color: rgba(123,97,255,0.35);">
-            <div class="marker-logo" style="background-color: ${c.color};">${c.name.charAt(0)}</div>
+            <img class="marker-logo" src="${logoUri}" alt="${c.name}" />
             <div class="marker-name">${c.name}</div>
           </div>
           <div class="marker-dot" style="background:${c.color};"></div>
@@ -228,7 +96,7 @@ export default function MapScreen() {
         iconAnchor: [70, 52]
       });
       L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map);
-    `).join('');
+    `}).join('');
 
     return `<!DOCTYPE html>
 <html>
@@ -254,9 +122,9 @@ export default function MapScreen() {
   }
   .marker-logo {
     width: 28px; height: 28px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 800; color: #fff;
+    object-fit: cover;
     margin-left: 4px; flex-shrink: 0;
+    background-color: #161622;
   }
   .marker-name {
     font-size: 12px; font-weight: 700; color: #fff;
@@ -318,7 +186,7 @@ export default function MapScreen() {
     try {
       const data = JSON.parse(e.data || '{}');
       if (data.clubId) {
-        const club = clubs.find(c => c.id === data.clubId);
+        const club = venues.find(c => c.id === data.clubId);
         if (club) focusClub(club);
       }
     } catch {}
@@ -412,8 +280,8 @@ export default function MapScreen() {
                         <Text style={styles.modalCity}>{selectedClub.city}</Text>
                       </View>
                     </View>
-                    <View style={[styles.modalEmojiWrap, { backgroundColor: selectedClub.color + '20', borderColor: selectedClub.color + '50' }]}>
-                      <Text style={styles.modalEmoji}>{selectedClub.image}</Text>
+                    <View style={[styles.modalLogoWrap, { backgroundColor: selectedClub.color + '20', borderColor: selectedClub.color + '50' }]}>
+                      <Image source={getVenueLogo(selectedClub)} style={styles.modalLogo} resizeMode="cover" />
                     </View>
                   </View>
 
@@ -529,12 +397,12 @@ const styles = StyleSheet.create({
     width: 260, backgroundColor: '#161622', borderRadius: 20,
     padding: 12, borderWidth: 1.5, borderColor: 'transparent',
   },
-  venueIconWrap: {
+  venueLogoWrap: {
     width: 52, height: 52, borderRadius: 16,
     alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: 1, overflow: 'hidden',
   },
-  venueIcon: { fontSize: 26 },
+  venueLogo: { width: 52, height: 52 },
   venueInfo: { flex: 1, justifyContent: 'center' },
   venueName: { fontSize: 15, fontWeight: '700', color: '#fff', marginBottom: 3 },
   venueCity: { fontSize: 12, color: '#9ca3af', marginBottom: 6 },
@@ -559,11 +427,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#0B0B14', alignItems: 'center', justifyContent: 'center',
   },
   modalTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  modalEmojiWrap: {
+  modalLogoWrap: {
     width: 56, height: 56, borderRadius: 18,
     alignItems: 'center', justifyContent: 'center', borderWidth: 1,
+    overflow: 'hidden',
   },
-  modalEmoji: { fontSize: 32 },
+  modalLogo: { width: 56, height: 56 },
   modalName: { fontSize: 26, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
   modalLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
   modalCity: { fontSize: 14, color: '#9ca3af', fontWeight: '600' },
