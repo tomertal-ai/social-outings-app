@@ -2,103 +2,106 @@
 
 This guide explains how to add or update a nightlife venue/club in the app.
 
+## How Logos Work
+
+Until you add an official logo, every venue shows a **clean text-based initials circle** in the same avatar slot. For example:
+
+- The Block → **TB**
+- Haoman 17 → **H17**
+- Alphabet → **A**
+- Roxanne → **R**
+- Atlanta → **AT**
+
+When you add an official logo file, the initials are automatically replaced by the image everywhere (map marker, bottom card, and modal).
+
 ## Folder Structure
 
-All venue logos are stored in:
+Official logos go here:
 
 ```
 assets/venues/logos/
 ```
 
-Current placeholder and example logos:
+Expected filenames for the current venues:
 
 ```
-assets/venues/logos/placeholder.png      # fallback logo
-assets/venues/logos/the-block.png        # The Block — Tel Aviv
-assets/venues/logos/haoman-17.png        # Haoman 17 — Jerusalem
-assets/venues/logos/alphabet.png         # Alphabet — Tel Aviv
-assets/venues/logos/roxanne.png          # Roxanne — Be'er Sheva
-assets/venues/logos/atlanta.png         # Atlanta — Tel Aviv
+assets/venues/logos/the-block.png      # The Block — Tel Aviv
+assets/venues/logos/haoman-17.png      # Haoman 17 — Jerusalem
+assets/venues/logos/alphabet.png       # Alphabet — Tel Aviv
+assets/venues/logos/roxanne.png        # Roxanne — Be'er Sheva
+assets/venues/logos/atlanta.png        # Atlanta — Tel Aviv
 ```
 
-## How to Add a New Club
+## How to Add a Real Logo
 
-### 1. Add the logo image
+### 1. Get the official logo
 
-- Place the official club logo in `assets/venues/logos/`.
-- Use a **square** PNG (recommended size: 128×128px or 256×256px).
-- The filename should match the venue slug in the data file (see step 2).
-- Example: for a club called `Mirage`, save the logo as:
-  ```
-  assets/venues/logos/mirage.png
-  ```
+Only use logos from approved sources (the club's official website, social media, or material you have permission to use). **Do not scrape images from the internet.**
 
-### 2. Add the venue data
+### 2. Place the file
 
-Open the venue data file:
+Save the logo as a **square PNG** in `assets/venues/logos/`.
+
+- Recommended size: 128×128px or 256×256px.
+- Filename must match the venue's `logo` `require(...)` path in `src/data/venues.ts`.
+
+Example: to add The Block's logo, save it as:
 
 ```
-src/data/venues.ts
+assets/venues/logos/the-block.png
 ```
 
-Add a new object to the `venues` array. Example:
+### 3. Update the venue data
+
+Open `src/data/venues.ts` and change the venue's `logo` field from `undefined` to the real file:
 
 ```typescript
 {
-  id: 6,
-  name: 'Mirage',
-  city: 'תל אביב',
-  address: 'רחוב הירקון 1, תל אביב',
-  latitude: 32.0853,
-  longitude: 34.7710,
-  logo: require('../../assets/venues/logos/mirage.png'),
-  description: 'מועדון חדש בתל אביב עם מוזיקה אלקטרונית.',
-  rating: 4.2,
-  priceRange: '₪50-100',
-  instagram: 'https://www.instagram.com/mirage_tlv/',
-  website: '',
-  ticketLink: '',
-  music: ['טכנו', 'האוס'],
-  minAge: 21,
-  entryPrice: '₪50-100',
-  capacity: 600,
-  openDays: 'ה׳-ש׳',
-  hours: '23:00 - 06:00',
-  color: '#7c3aed',
-  tags: ['מועדון חדש', 'אלקטרו', 'תל אביב'],
-},
+  id: 1,
+  name: 'The Block',
+  city: 'Tel Aviv',
+  // ... other fields ...
+  initials: 'TB',
+  logo: require('../../assets/venues/logos/the-block.png'),
+  // ...
+}
 ```
 
-### 3. Match the filename
-
-Make sure the `require(...)` path points exactly to the logo file you added.
-
-```typescript
-logo: require('../../assets/venues/logos/mirage.png'),
-```
+Keep the `initials` field — it is still used as the fallback if the logo is ever removed.
 
 ### 4. Verify it appears
 
-1. Restart the Expo app (`npx expo start` or reload the simulator).
+1. Restart the Expo app:
+   ```bash
+   npx expo start --clear
+   ```
 2. Open the Map screen.
-3. Confirm the new venue appears:
-   - On the **map marker** (small logo + club name)
-   - In the **bottom venue cards**
-   - In the **venue details modal**
+3. Confirm the logo appears in:
+   - The **map marker**
+   - The **bottom venue cards**
+   - The **venue details modal**
+
+## How to Add a New Club
+
+1. Add the venue data to `src/data/venues.ts`.
+2. Set `initials` (e.g., `XL` for a club called `X-Lounge`).
+3. Leave `logo: undefined` until you have the official logo.
+4. When you have the logo, save it to `assets/venues/logos/` and update the `logo` field with `require(...)`.
+5. Restart the app and verify on the map and cards.
 
 ## Important Notes
 
-- **Placeholder**: If a venue's `logo` field is missing or invalid, the app automatically shows `assets/venues/logos/placeholder.png`. The app will not crash.
-- **No emojis**: Venue cards and markers now use real logo images instead of emojis.
-- **Coordinates**: If you don't have exact coordinates, use an approximate location and mark it with a comment. Update it later.
-- **Approved sources only**: Use official logos from the club's website, social media, or materials you have permission to use. Do not scrape images without permission.
+- **No fake logos**: Do not add invented or placeholder image files. The app shows clean initials until you provide a real logo.
+- **No crashes**: If `logo` is `undefined` or the image path is wrong, the app falls back to the `initials` circle. It will never crash.
+- **No emojis**: The UI now uses logos or initials, never emojis.
+- **Coordinates**: If exact coordinates are unavailable, use an approximate value and update it later.
 - **Logo format**: PNG is recommended. JPG and WEBP are also supported by React Native.
 
 ## How to Update an Existing Logo
 
 1. Replace the PNG file in `assets/venues/logos/`.
 2. Keep the same filename (e.g., `the-block.png`).
-3. Clear the Expo cache or restart the app.
+3. Clear the Expo cache and restart:
 
 ```bash
 npx expo start --clear

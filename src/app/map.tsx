@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import WebView from 'react-native-webview';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientButton from '../components/GradientButton';
-import { venues, Venue, getVenueLogo } from '../data/venues';
+import { venues, Venue, getVenueLogo, getVenueInitials } from '../data/venues';
 
 type Club = Venue;
 
@@ -31,6 +31,22 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
   );
 }
 
+function VenueAvatar({ venue, size }: { venue: Club; size: number }) {
+  const logo = getVenueLogo(venue);
+  if (logo) {
+    return (
+      <View style={[styles.avatarWrap, { width: size, height: size, borderRadius: size / 2, backgroundColor: venue.color + '20', borderColor: venue.color + '50' }]}>
+        <Image source={logo} style={{ width: size, height: size, borderRadius: size / 2 }} resizeMode="cover" />
+      </View>
+    );
+  }
+  return (
+    <View style={[styles.avatarWrap, { width: size, height: size, borderRadius: size / 2, backgroundColor: venue.color, borderColor: venue.color + '80' }]}>
+      <Text style={[styles.avatarInitials, { fontSize: size * 0.4, color: '#fff' }]}>{getVenueInitials(venue)}</Text>
+    </View>
+  );
+}
+
 function VenueCard({ club, selected, onPress }: { club: Club; selected: boolean; onPress: () => void }) {
   return (
     <TouchableOpacity
@@ -41,9 +57,7 @@ function VenueCard({ club, selected, onPress }: { club: Club; selected: boolean;
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <View style={[styles.venueLogoWrap, { backgroundColor: club.color + '20', borderColor: club.color + '50' }]}>
-        <Image source={getVenueLogo(club)} style={styles.venueLogo} resizeMode="cover" />
-      </View>
+      <VenueAvatar venue={club} size={52} />
       <View style={styles.venueInfo}>
         <Text style={styles.venueName} numberOfLines={1}>{club.name}</Text>
         <Text style={styles.venueCity}>{club.city}</Text>
@@ -68,32 +82,33 @@ export default function MapScreen() {
   const filtered = filterCity ? venues.filter(c => c.city === filterCity) : venues;
 
   const buildMapHtml = (clubList: Club[], centerLat: number, centerLng: number, zoom: number) => {
-    const placeholderSvg = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><rect width="28" height="28" rx="8" fill="%237B61FF"/><circle cx="14" cy="14" r="8" fill="%23D946EF"/></svg>`);
-
     const getLogoUri = (venue: Club) => {
-      if (Platform.OS === 'web') return placeholderSvg;
+      const logo = getVenueLogo(venue);
+      if (!logo) return '';
+      if (Platform.OS === 'web') return '';
       try {
-        const source = getVenueLogo(venue);
-        return Image.resolveAssetSource(source).uri || placeholderSvg;
+        return Image.resolveAssetSource(logo).uri || '';
       } catch {
-        return placeholderSvg;
+        return '';
       }
     };
 
     const markersJs = clubList.map(c => {
       const logoUri = getLogoUri(c);
+      const avatar = logoUri
+        ? `<img class="marker-avatar" src="${logoUri}" alt="${c.name}" />`
+        : `<div class="marker-initials" style="background-color:${c.color};">${getVenueInitials(c)}</div>`;
       return `
       var icon${c.id} = L.divIcon({
         html: \`<div class="marker-root" id="marker-${c.id}" onclick="selectMarker(${c.id})">
           <div class="marker-pill" style="border-color: rgba(123,97,255,0.35);">
-            <img class="marker-logo" src="${logoUri}" alt="${c.name}" />
+            ${avatar}
             <div class="marker-name">${c.name}</div>
           </div>
-          <div class="marker-dot" style="background:${c.color};"></div>
         </div>\`,
         className: '',
-        iconSize: [140, 52],
-        iconAnchor: [70, 52]
+        iconSize: [150, 40],
+        iconAnchor: [75, 20]
       });
       L.marker([${c.latitude}, ${c.longitude}], { icon: icon${c.id} }).addTo(map);
     `}).join('');
@@ -109,35 +124,40 @@ export default function MapScreen() {
   #map { width:100vw; height:100vh; }
   .leaflet-tile-pane { filter: contrast(1.05) saturate(1.05) brightness(0.95); }
   .marker-root {
-    display: flex; flex-direction: column; align-items: center; cursor: pointer;
+    display: flex; align-items: center; cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
   .marker-pill {
     display: flex; flex-direction: row; align-items: center;
-    height: 36px; max-width: 130px; border-radius: 18px;
+    height: 38px; max-width: 150px; border-radius: 19px;
     background: rgba(16,16,28,0.95); border: 1.5px solid;
     box-shadow: 0 4px 14px rgba(0,0,0,0.5);
     overflow: hidden;
     transition: transform 0.25s cubic-bezier(0.25, 0.1, 0.25, 1), box-shadow 0.25s ease, border-color 0.25s ease;
   }
-  .marker-logo {
-    width: 28px; height: 28px; border-radius: 10px;
+  .marker-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
     object-fit: cover;
     margin-left: 4px; flex-shrink: 0;
     background-color: #161622;
   }
+  .marker-initials {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-left: 4px; flex-shrink: 0;
+    font-size: 12px; font-weight: 800; color: #fff;
+  }
   .marker-name {
     font-size: 12px; font-weight: 700; color: #fff;
-    padding: 0 10px 0 7px;
+    padding: 0 12px 0 8px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 90px;
+    max-width: 110px;
   }
   .marker-root.active .marker-pill {
     transform: scale(1.08);
     border-color: #7B61FF;
     box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 16px rgba(123,97,255,0.5);
   }
-  .marker-dot { width: 5px; height: 5px; border-radius: 50%; margin-top: 2px; box-shadow: 0 0 8px currentColor; }
   .leaflet-control-attribution { font-size:8px; opacity:0.3; color:#9ca3af; }
   .leaflet-control-attribution a { color:#9ca3af; }
   .leaflet-control-zoom { border:none !important; box-shadow:0 4px 16px rgba(0,0,0,0.4) !important; border-radius:12px !important; overflow:hidden; }
@@ -280,9 +300,7 @@ export default function MapScreen() {
                         <Text style={styles.modalCity}>{selectedClub.city}</Text>
                       </View>
                     </View>
-                    <View style={[styles.modalLogoWrap, { backgroundColor: selectedClub.color + '20', borderColor: selectedClub.color + '50' }]}>
-                      <Image source={getVenueLogo(selectedClub)} style={styles.modalLogo} resizeMode="cover" />
-                    </View>
+                    <VenueAvatar venue={selectedClub} size={56} />
                   </View>
 
                   <View style={styles.ratingRow}>
@@ -397,12 +415,11 @@ const styles = StyleSheet.create({
     width: 260, backgroundColor: '#161622', borderRadius: 20,
     padding: 12, borderWidth: 1.5, borderColor: 'transparent',
   },
-  venueLogoWrap: {
-    width: 52, height: 52, borderRadius: 16,
+  avatarWrap: {
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, overflow: 'hidden',
   },
-  venueLogo: { width: 52, height: 52 },
+  avatarInitials: { fontWeight: '800', color: '#fff' },
   venueInfo: { flex: 1, justifyContent: 'center' },
   venueName: { fontSize: 15, fontWeight: '700', color: '#fff', marginBottom: 3 },
   venueCity: { fontSize: 12, color: '#9ca3af', marginBottom: 6 },
@@ -427,12 +444,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0B0B14', alignItems: 'center', justifyContent: 'center',
   },
   modalTitleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
-  modalLogoWrap: {
-    width: 56, height: 56, borderRadius: 18,
-    alignItems: 'center', justifyContent: 'center', borderWidth: 1,
-    overflow: 'hidden',
-  },
-  modalLogo: { width: 56, height: 56 },
   modalName: { fontSize: 26, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
   modalLocationRow: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
   modalCity: { fontSize: 14, color: '#9ca3af', fontWeight: '600' },
