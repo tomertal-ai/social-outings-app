@@ -35,7 +35,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="parties"
         options={{
-          title: 'מסיבות',
+          title: 'מועדונים',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'musical-notes' : 'musical-notes-outline'} size={24} color={color} />
           ),
@@ -44,9 +44,9 @@ export default function TabLayout() {
       <Tabs.Screen
         name="my-events"
         options={{
-          title: 'האירועים שלי',
+          title: 'כרטיסים',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'ticket' : 'ticket-outline'} size={24} color={color} />
           ),
         }}
       />
