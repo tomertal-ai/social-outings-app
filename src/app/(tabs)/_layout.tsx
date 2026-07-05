@@ -17,10 +17,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'בית',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -35,10 +32,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="parties"
         options={{
-          title: 'מועדונים',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'musical-notes' : 'musical-notes-outline'} size={24} color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -47,6 +41,15 @@ export default function TabLayout() {
           title: 'כרטיסים',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'ticket' : 'ticket-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'אני',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} size={24} color={color} />
           ),
         }}
       />
