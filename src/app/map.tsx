@@ -1,9 +1,10 @@
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated, Keyboard, StyleSheet, Dimensions, Image } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated, Keyboard, StyleSheet, Dimensions, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 import { clubs } from '../data/clubs';
 import { Club } from '../types';
 import { useClubSearch } from '../hooks/useClubSearch';
@@ -13,6 +14,69 @@ import ClubDetailModal from '../components/clubs/ClubDetailModal';
 import { getClubLogo, getClubInitials } from '../data/clubs';
 
 const DEFAULT_CENTER = { lat: 32.0, lng: 34.85, zoom: 8 };
+
+function useCardPressAnim() {
+  const scale = useRef(new Animated.Value(1)).current;
+  const onPressIn  = () => Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 50, bounciness: 0 }).start();
+  const onPressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true, speed: 30, bounciness: 4 }).start();
+  return { scale, onPressIn, onPressOut };
+}
+
+interface CardProps {
+  club: Club;
+  index: number;
+  total: number;
+  isSelected: boolean;
+  onLayout: (y: number) => void;
+  onPress: () => void;
+}
+
+function AnimatedClubCard({ club, index, total, isSelected, onLayout, onPress }: CardProps) {
+  const { scale, onPressIn, onPressOut } = useCardPressAnim();
+  const logo = getClubLogo(club);
+  return (
+    <Animated.View
+      style={{ transform: [{ scale }] }}
+      onLayout={e => onLayout(e.nativeEvent.layout.y)}
+    >
+      <TouchableOpacity
+        activeOpacity={1}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        onPress={onPress}
+        style={[
+          styles.clubCard,
+          index < total - 1 && styles.clubCardBorder,
+          isSelected && styles.clubCardSelected,
+        ]}
+      >
+        {isSelected && <View style={[styles.selectedBar, { backgroundColor: club.color }]} />}
+        <View style={[styles.clubAvatar, { borderColor: club.color + '55' }]}>
+          {logo ? (
+            <Image source={logo} style={styles.clubAvatarImg} />
+          ) : (
+            <View style={[styles.clubAvatarFallback, { backgroundColor: club.color + '22' }]}>
+              <Text style={[styles.clubAvatarInitials, { color: club.color }]}>
+                {getClubInitials(club)}
+              </Text>
+            </View>
+          )}
+        </View>
+        <View style={styles.clubInfo}>
+          <Text style={styles.clubName} numberOfLines={1}>{club.name}</Text>
+          <Text style={styles.clubCity} numberOfLines={1}>{club.city}</Text>
+        </View>
+        <View style={styles.clubRight}>
+          <View style={styles.clubRatingRow}>
+            <Text style={[styles.clubRatingStar, { color: club.color }]}>★</Text>
+            <Text style={styles.clubRatingValue}>{club.rating}</Text>
+          </View>
+          <Text style={styles.clubPrice} numberOfLines={1}>{club.entryPrice}</Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
 
 export default function MapScreen() {
   const router = useRouter();
@@ -25,6 +89,13 @@ export default function MapScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const sheetListRef = useRef<any>(null);
   const snapPoints = useMemo(() => ['12%', '45%', '88%'], []);
+
+  const animationConfigs = useBottomSheetSpringConfigs({
+    mass: 0.6,
+    stiffness: 280,
+    damping: 28,
+    overshootClamping: false,
+  });
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const cardRefs = useRef<Record<number, number>>({});
 
@@ -48,8 +119,8 @@ export default function MapScreen() {
     Animated.spring(dropdownAnim, {
       toValue: shouldShow ? 1 : 0,
       useNativeDriver: true,
-      tension: 80,
-      friction: 12,
+      tension: 120,
+      friction: 14,
     }).start();
   }, [query]);
 
@@ -154,8 +225,14 @@ export default function MapScreen() {
         ref={bottomSheetRef}
         index={0}
         snapPoints={snapPoints}
+        animationConfigs={animationConfigs}
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.sheetHandle}
+        handleStyle={styles.sheetHandleArea as any}
+        enableOverDrag={true}
+        enablePanDownToClose={false}
+        keyboardBehavior="extend"
+        android_keyboardInputMode="adjustResize"
       >
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>
@@ -167,56 +244,17 @@ export default function MapScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.sheetList}
         >
-          {visibleClubs.map((club, index) => {
-            const logo = getClubLogo(club);
-            const isSelected = selectedClub?.id === club.id;
-            return (
-              <TouchableOpacity
-                key={club.id}
-                activeOpacity={0.82}
-                onLayout={e => { cardRefs.current[club.id] = e.nativeEvent.layout.y; }}
-                onPress={() => {
-                  focusClub(club);
-                  goToDetails(club);
-                }}
-                style={[
-                  styles.clubCard,
-                  index < visibleClubs.length - 1 && styles.clubCardBorder,
-                  isSelected && styles.clubCardSelected,
-                ]}
-              >
-                {/* Avatar */}
-                <View style={[styles.clubAvatar, { borderColor: club.color + '60' }]}>
-                  {logo ? (
-                    <Image source={logo} style={styles.clubAvatarImg} />
-                  ) : (
-                    <View style={[styles.clubAvatarFallback, { backgroundColor: club.color + '22' }]}>
-                      <Text style={[styles.clubAvatarInitials, { color: club.color }]}>
-                        {getClubInitials(club)}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-
-                {/* Info */}
-                <View style={styles.clubInfo}>
-                  <Text style={styles.clubName} numberOfLines={1}>{club.name}</Text>
-                  <Text style={styles.clubCity} numberOfLines={1}>{club.city}</Text>
-                </View>
-
-                {/* Right side */}
-                <View style={styles.clubRight}>
-                  <View style={styles.clubRatingRow}>
-                    <Text style={[styles.clubRatingStar, { color: club.color }]}>★</Text>
-                    <Text style={styles.clubRatingValue}>{club.rating}</Text>
-                  </View>
-                  <Text style={styles.clubPrice} numberOfLines={1}>{club.entryPrice}</Text>
-                </View>
-
-                {isSelected && <View style={[styles.selectedBar, { backgroundColor: club.color }]} />}
-              </TouchableOpacity>
-            );
-          })}
+          {visibleClubs.map((club, index) => (
+            <AnimatedClubCard
+              key={club.id}
+              club={club}
+              index={index}
+              total={visibleClubs.length}
+              isSelected={selectedClub?.id === club.id}
+              onLayout={(y: number) => { cardRefs.current[club.id] = y; }}
+              onPress={() => { focusClub(club); goToDetails(club); }}
+            />
+          ))}
           {visibleClubs.length === 0 && (
             <View style={styles.emptyState}>
               <Ionicons name="map-outline" size={32} color="#2A2A3C" />
@@ -265,9 +303,17 @@ const styles = StyleSheet.create({
   sheetBg: {
     backgroundColor: '#161622',
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.55,
+    shadowRadius: 24,
+    elevation: 24,
+  },
+  sheetHandleArea: {
+    paddingTop: 10, paddingBottom: 4,
   },
   sheetHandle: {
-    backgroundColor: '#3A3A4C', width: 36, height: 4,
+    backgroundColor: '#3A3A4C', width: 40, height: 5, borderRadius: 3,
   },
   sheetHeader: {
     paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10,
