@@ -1,9 +1,10 @@
 import {
   View, Text, ScrollView, TouchableOpacity,
-  Linking, StyleSheet, Platform,
+  Linking, StyleSheet, Platform, Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { clubs } from '../../data/clubs';
@@ -34,10 +35,39 @@ function Tag({ label, color, filled }: { label: string; color: string; filled?: 
   );
 }
 
+function BuyTicketsButton({ url, color }: { url: string; color: string }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const onPressIn  = () => Animated.spring(scale, { toValue: 0.96, useNativeDriver: true, speed: 50, bounciness: 0 }).start();
+  const onPressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true, speed: 30, bounciness: 5 }).start();
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <TouchableOpacity
+        activeOpacity={1}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        onPress={() => Linking.openURL(url).catch(() => {})}
+      >
+        <LinearGradient
+          colors={['#2CB7FF', '#7B61FF', '#D946EF']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.buyBtn}
+        >
+          <Ionicons name="ticket-outline" size={20} color="#fff" />
+          <Text style={styles.buyBtnText}>Buy Tickets</Text>
+          <Ionicons name="arrow-forward" size={16} color="rgba(255,255,255,0.7)" />
+        </LinearGradient>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 export default function ClubDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const club = clubs.find(c => String(c.id) === id);
+  const [isSaved, setIsSaved] = useState(false);
+  const heartScale = useRef(new Animated.Value(1)).current;
 
   if (!club) {
     return (
@@ -57,18 +87,37 @@ export default function ClubDetailScreen() {
     if (url) Linking.openURL(url).catch(() => {});
   };
 
-  const hasTicket = !!club.ticketLink;
+  const ticketUrl  = club.ticketLink || club.website;
+  const hasTicket  = !!ticketUrl;
   const hasInstagram = !!club.instagram;
-  const hasWebsite = !!club.website;
+  const hasWebsite   = !!club.website;
+
+  const toggleSave = () => {
+    Animated.sequence([
+      Animated.spring(heartScale, { toValue: 1.35, useNativeDriver: true, speed: 50, bounciness: 8 }),
+      Animated.spring(heartScale, { toValue: 1,    useNativeDriver: true, speed: 30, bounciness: 3 }),
+    ]).start();
+    setIsSaved(s => !s);
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Header */}
+
+        {/* Header bar */}
         <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backCircle} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn} activeOpacity={0.7}>
             <Ionicons name={Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back'} size={22} color="#fff" />
           </TouchableOpacity>
+          <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+            <TouchableOpacity onPress={toggleSave} style={styles.headerBtn} activeOpacity={0.7}>
+              <Ionicons
+                name={isSaved ? 'heart' : 'heart-outline'}
+                size={22}
+                color={isSaved ? '#ef4444' : '#fff'}
+              />
+            </TouchableOpacity>
+          </Animated.View>
         </View>
 
         {/* Hero */}
@@ -89,6 +138,13 @@ export default function ClubDetailScreen() {
           </View>
         </View>
 
+        {/* Primary CTA — top position */}
+        {hasTicket && (
+          <View style={styles.topCta}>
+            <BuyTicketsButton url={ticketUrl} color={club.color} />
+          </View>
+        )}
+
         {/* Description */}
         {!!club.description && (
           <View style={styles.section}>
@@ -96,14 +152,12 @@ export default function ClubDetailScreen() {
           </View>
         )}
 
-        {/* Info Grid */}
+        {/* Info Grid — MVP relevant only */}
         <View style={styles.infoGrid}>
-          <InfoBox icon="location-outline" label="כתובת" value={club.address} color={club.color} />
-          <InfoBox icon="time-outline" label="שעות" value={club.hours} color={club.color} />
-          <InfoBox icon="calendar-outline" label="ימים" value={club.openDays} color={club.color} />
-          <InfoBox icon="cash-outline" label="כניסה" value={club.entryPrice} color={club.color} />
-          <InfoBox icon="person-outline" label="גיל מינ׳" value={`${club.minAge}+`} color={club.color} />
-          <InfoBox icon="people-outline" label="קיבולת" value={`${club.capacity} אנשים`} color={club.color} />
+          <InfoBox icon="time-outline"     label="שעות"    value={club.hours}          color={club.color} />
+          <InfoBox icon="calendar-outline" label="ימים"    value={club.openDays}       color={club.color} />
+          <InfoBox icon="cash-outline"     label="כניסה"   value={club.entryPrice}     color={club.color} />
+          <InfoBox icon="person-outline"   label="גיל מינ׳" value={`${club.minAge}+`}  color={club.color} />
         </View>
 
         {/* Music */}
@@ -115,63 +169,45 @@ export default function ClubDetailScreen() {
         </View>
 
         {/* Tags */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>מאפיינים</Text>
-          <View style={styles.tagsRow}>
-            {club.tags.map(t => <Tag key={t} label={t} color={club.color} />)}
+        {club.tags.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>מאפיינים</Text>
+            <View style={styles.tagsRow}>
+              {club.tags.map(t => <Tag key={t} label={t} color={club.color} />)}
+            </View>
           </View>
-        </View>
+        )}
 
-        {/* Links row */}
+        {/* Links */}
         {(hasInstagram || hasWebsite) && (
           <View style={styles.linksRow}>
             {hasInstagram && (
-              <TouchableOpacity
-                style={styles.linkBtn}
-                onPress={() => openLink(club.instagram)}
-                activeOpacity={0.7}
-              >
+              <TouchableOpacity style={styles.linkBtn} onPress={() => openLink(club.instagram)} activeOpacity={0.7}>
                 <Ionicons name="logo-instagram" size={18} color="#E1306C" />
                 <Text style={styles.linkBtnText}>Instagram</Text>
               </TouchableOpacity>
             )}
             {hasWebsite && (
-              <TouchableOpacity
-                style={styles.linkBtn}
-                onPress={() => openLink(club.website)}
-                activeOpacity={0.7}
-              >
+              <TouchableOpacity style={styles.linkBtn} onPress={() => openLink(club.website)} activeOpacity={0.7}>
                 <Ionicons name="globe-outline" size={18} color="#60a5fa" />
-                <Text style={styles.linkBtnText}>אתר</Text>
+                <Text style={styles.linkBtnText}>Website</Text>
               </TouchableOpacity>
             )}
           </View>
         )}
 
-        {/* Ticket CTA */}
-        <View style={styles.ctaSection}>
+        {/* Bottom CTA */}
+        <View style={styles.bottomCta}>
           {hasTicket ? (
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => openLink(club.ticketLink)}
-            >
-              <LinearGradient
-                colors={['#2CB7FF', '#7B61FF', '#D946EF']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.ticketBtn}
-              >
-                <Ionicons name="ticket-outline" size={20} color="#fff" />
-                <Text style={styles.ticketBtnText}>רכוש כרטיס</Text>
-              </LinearGradient>
-            </TouchableOpacity>
+            <BuyTicketsButton url={ticketUrl} color={club.color} />
           ) : (
-            <View style={styles.ticketBtnDisabled}>
-              <Ionicons name="ticket-outline" size={20} color="#4b5563" />
-              <Text style={styles.ticketBtnDisabledText}>כרטיסים בקרוב</Text>
+            <View style={styles.noTicketBox}>
+              <Ionicons name="information-circle-outline" size={18} color="#4b5563" />
+              <Text style={styles.noTicketText}>אין מידע על כרטיסים כרגע</Text>
             </View>
           )}
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -187,13 +223,26 @@ const styles = StyleSheet.create({
 
   headerRow: {
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4,
-    flexDirection: 'row', alignItems: 'center',
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
   },
-  backCircle: {
+  headerBtn: {
     width: 40, height: 40, borderRadius: 13,
     backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
     alignItems: 'center', justifyContent: 'center',
   },
+  topCta: { paddingHorizontal: 20, marginBottom: 20 },
+  bottomCta: { paddingHorizontal: 20, marginTop: 8, marginBottom: 8 },
+  buyBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 10, paddingVertical: 17, borderRadius: 18,
+  },
+  buyBtnText: { fontSize: 17, fontWeight: '800', color: '#fff', letterSpacing: -0.3 },
+  noTicketBox: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 8, paddingVertical: 16, borderRadius: 16,
+    backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
+  },
+  noTicketText: { fontSize: 14, color: '#4b5563', fontWeight: '600' },
 
   hero: {
     flexDirection: 'row', alignItems: 'center', gap: 18,
