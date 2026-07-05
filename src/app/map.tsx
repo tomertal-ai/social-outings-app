@@ -1,15 +1,17 @@
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated, Keyboard, StyleSheet } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated, Keyboard, StyleSheet, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { clubs } from '../data/clubs';
 import { Club } from '../types';
 import { useClubSearch } from '../hooks/useClubSearch';
 import ClubSearchBar from '../components/clubs/ClubSearchBar';
 import ClubMap from '../components/clubs/ClubMap';
-import ClubCardCarousel from '../components/clubs/ClubCardCarousel';
 import ClubDetailModal from '../components/clubs/ClubDetailModal';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 const DEFAULT_CENTER = { lat: 32.0, lng: 34.85, zoom: 8 };
 
@@ -21,6 +23,8 @@ export default function MapScreen() {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownAnim = useRef(new Animated.Value(0)).current;
   const { query, setQuery, clear, filtered: searchFiltered } = useClubSearch(clubs);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ['12%', '45%', '88%'], []);
 
   useEffect(() => {
     const shouldShow = query.trim().length > 0;
@@ -124,15 +128,17 @@ export default function MapScreen() {
         onRecenter={resetMap}
       />
 
-      <View style={styles.bottomPanel}>
-        <View style={styles.bottomHandle} />
-        <ClubCardCarousel
-          clubs={clubs}
-          selectedClubId={selectedClub?.id}
-          onSelectClub={focusClub}
-          onDetailsClub={goToDetails}
-        />
-      </View>
+      <BottomSheet
+        ref={bottomSheetRef}
+        index={0}
+        snapPoints={snapPoints}
+        backgroundStyle={styles.sheetBg}
+        handleIndicatorStyle={styles.sheetHandle}
+      >
+        <BottomSheetView style={styles.sheetContent}>
+          <Text style={styles.sheetTitle}>מועדונים באזור זה</Text>
+        </BottomSheetView>
+      </BottomSheet>
 
       <ClubDetailModal club={selectedClub} onClose={() => setSelectedClub(null)} onViewDetails={goToDetails} />
     </SafeAreaView>
@@ -170,15 +176,17 @@ const styles = StyleSheet.create({
   dropdownRowRating: { fontSize: 12, fontWeight: '700', flexShrink: 0 },
   dropdownEmpty: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 24 },
   dropdownEmptyText: { fontSize: 14, color: '#4b5563', fontWeight: '600' },
-  bottomPanel: {
-    backgroundColor: '#0B0B14',
+  sheetBg: {
+    backgroundColor: '#161622',
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    paddingTop: 12, paddingBottom: 16,
-    shadowColor: '#000', shadowOffset: { width: 0, height: -6 }, shadowOpacity: 0.5, shadowRadius: 20,
-    elevation: 16,
   },
-  bottomHandle: {
-    width: 36, height: 4, borderRadius: 2, backgroundColor: '#2A2A3C',
-    alignSelf: 'center', marginBottom: 12,
+  sheetHandle: {
+    backgroundColor: '#3A3A4C', width: 36, height: 4,
+  },
+  sheetContent: {
+    paddingHorizontal: 22, paddingTop: 8,
+  },
+  sheetTitle: {
+    fontSize: 17, fontWeight: '700', color: '#fff', letterSpacing: -0.3,
   },
 });
