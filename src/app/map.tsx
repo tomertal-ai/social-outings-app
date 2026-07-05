@@ -1,17 +1,16 @@
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated, Keyboard, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated, Keyboard, StyleSheet, Dimensions, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { clubs } from '../data/clubs';
 import { Club } from '../types';
 import { useClubSearch } from '../hooks/useClubSearch';
 import ClubSearchBar from '../components/clubs/ClubSearchBar';
 import ClubMap, { MapBounds } from '../components/clubs/ClubMap';
 import ClubDetailModal from '../components/clubs/ClubDetailModal';
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
+import { getClubLogo, getClubInitials } from '../data/clubs';
 
 const DEFAULT_CENTER = { lat: 32.0, lng: 34.85, zoom: 8 };
 
@@ -24,8 +23,10 @@ export default function MapScreen() {
   const dropdownAnim = useRef(new Animated.Value(0)).current;
   const { query, setQuery, clear, filtered: searchFiltered } = useClubSearch(clubs);
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const sheetListRef = useRef<any>(null);
   const snapPoints = useMemo(() => ['12%', '45%', '88%'], []);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+  const cardRefs = useRef<Record<number, number>>({});
 
   const visibleClubs = useMemo(() => {
     if (!mapBounds) return clubs;
@@ -52,10 +53,15 @@ export default function MapScreen() {
     }).start();
   }, [query]);
 
-  const focusClub = (club: Club) => {
+  const focusClub = useCallback((club: Club) => {
     setSelectedClub(club);
     setMapCenter({ lat: club.latitude, lng: club.longitude, zoom: 15 });
-  };
+    bottomSheetRef.current?.snapToIndex(1);
+    const yOffset = cardRefs.current[club.id];
+    if (yOffset !== undefined && sheetListRef.current) {
+      sheetListRef.current.scrollTo({ y: yOffset, animated: true });
+    }
+  }, []);
 
   const handleSelectFromSearch = (club: Club) => {
     Keyboard.dismiss();
@@ -151,11 +157,73 @@ export default function MapScreen() {
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.sheetHandle}
       >
-        <BottomSheetView style={styles.sheetContent}>
+        <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>
             {`מועדונים באזור זה (${visibleClubs.length})`}
           </Text>
-        </BottomSheetView>
+        </View>
+        <BottomSheetScrollView
+          ref={sheetListRef}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.sheetList}
+        >
+          {visibleClubs.map((club, index) => {
+            const logo = getClubLogo(club);
+            const isSelected = selectedClub?.id === club.id;
+            return (
+              <TouchableOpacity
+                key={club.id}
+                activeOpacity={0.82}
+                onLayout={e => { cardRefs.current[club.id] = e.nativeEvent.layout.y; }}
+                onPress={() => {
+                  focusClub(club);
+                  goToDetails(club);
+                }}
+                style={[
+                  styles.clubCard,
+                  index < visibleClubs.length - 1 && styles.clubCardBorder,
+                  isSelected && styles.clubCardSelected,
+                ]}
+              >
+                {/* Avatar */}
+                <View style={[styles.clubAvatar, { borderColor: club.color + '60' }]}>
+                  {logo ? (
+                    <Image source={logo} style={styles.clubAvatarImg} />
+                  ) : (
+                    <View style={[styles.clubAvatarFallback, { backgroundColor: club.color + '22' }]}>
+                      <Text style={[styles.clubAvatarInitials, { color: club.color }]}>
+                        {getClubInitials(club)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Info */}
+                <View style={styles.clubInfo}>
+                  <Text style={styles.clubName} numberOfLines={1}>{club.name}</Text>
+                  <Text style={styles.clubCity} numberOfLines={1}>{club.city}</Text>
+                </View>
+
+                {/* Right side */}
+                <View style={styles.clubRight}>
+                  <View style={styles.clubRatingRow}>
+                    <Text style={[styles.clubRatingStar, { color: club.color }]}>★</Text>
+                    <Text style={styles.clubRatingValue}>{club.rating}</Text>
+                  </View>
+                  <Text style={styles.clubPrice} numberOfLines={1}>{club.entryPrice}</Text>
+                </View>
+
+                {isSelected && <View style={[styles.selectedBar, { backgroundColor: club.color }]} />}
+              </TouchableOpacity>
+            );
+          })}
+          {visibleClubs.length === 0 && (
+            <View style={styles.emptyState}>
+              <Ionicons name="map-outline" size={32} color="#2A2A3C" />
+              <Text style={styles.emptyText}>אין מועדונים באזור זה</Text>
+            </View>
+          )}
+        </BottomSheetScrollView>
       </BottomSheet>
 
       <ClubDetailModal club={selectedClub} onClose={() => setSelectedClub(null)} onViewDetails={goToDetails} />
@@ -201,10 +269,78 @@ const styles = StyleSheet.create({
   sheetHandle: {
     backgroundColor: '#3A3A4C', width: 36, height: 4,
   },
-  sheetContent: {
-    paddingHorizontal: 22, paddingTop: 8,
+  sheetHeader: {
+    paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10,
+    borderBottomWidth: 1, borderBottomColor: '#1f1f30',
   },
   sheetTitle: {
-    fontSize: 17, fontWeight: '700', color: '#fff', letterSpacing: -0.3,
+    fontSize: 15, fontWeight: '700', color: '#fff', letterSpacing: -0.2,
+  },
+  sheetList: {
+    paddingBottom: 40,
+  },
+
+  clubCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    paddingHorizontal: 18, paddingVertical: 13,
+    position: 'relative', overflow: 'hidden',
+  },
+  clubCardBorder: {
+    borderBottomWidth: 1, borderBottomColor: '#1f1f30',
+  },
+  clubCardSelected: {
+    backgroundColor: '#1e1e30',
+  },
+  selectedBar: {
+    position: 'absolute', left: 0, top: 10, bottom: 10,
+    width: 3, borderRadius: 2,
+  },
+
+  clubAvatar: {
+    width: 42, height: 42, borderRadius: 13,
+    borderWidth: 1.5, overflow: 'hidden', flexShrink: 0,
+  },
+  clubAvatarImg: {
+    width: '100%', height: '100%',
+  },
+  clubAvatarFallback: {
+    flex: 1, alignItems: 'center', justifyContent: 'center',
+  },
+  clubAvatarInitials: {
+    fontSize: 14, fontWeight: '800',
+  },
+
+  clubInfo: {
+    flex: 1, gap: 2,
+  },
+  clubName: {
+    fontSize: 14, fontWeight: '700', color: '#fff', letterSpacing: -0.2,
+  },
+  clubCity: {
+    fontSize: 12, color: '#6b7280', fontWeight: '500',
+  },
+
+  clubRight: {
+    alignItems: 'flex-end', gap: 3,
+  },
+  clubRatingRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+  },
+  clubRatingStar: {
+    fontSize: 11,
+  },
+  clubRatingValue: {
+    fontSize: 12, fontWeight: '700', color: '#fff',
+  },
+  clubPrice: {
+    fontSize: 11, color: '#6b7280', fontWeight: '600',
+  },
+
+  emptyState: {
+    alignItems: 'center', justifyContent: 'center',
+    paddingTop: 48, gap: 10,
+  },
+  emptyText: {
+    fontSize: 14, color: '#374151', fontWeight: '600',
   },
 });
