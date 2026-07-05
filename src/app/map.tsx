@@ -1,11 +1,12 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Platform, Modal } from 'react-native';
+import { View, Text, Image, TextInput, StyleSheet, TouchableOpacity, ScrollView, Platform, Modal, Animated, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import WebView from 'react-native-webview';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientButton from '../components/GradientButton';
 import { venues, Venue, getVenueLogo, getVenueInitials } from '../data/venues';
+import { useVenueSearch } from '../hooks/useVenueSearch';
 
 type Club = Venue;
 
@@ -28,6 +29,31 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
     <TouchableOpacity style={styles.filterChip} onPress={onPress} activeOpacity={0.7}>
       <Text style={styles.filterChipText}>{label}</Text>
     </TouchableOpacity>
+  );
+}
+
+function SearchBar({ value, onChangeText, onClear, inputRef }: { value: string; onChangeText: (text: string) => void; onClear: () => void; inputRef?: React.RefObject<TextInput | null> }) {
+  return (
+    <View style={styles.searchBar}>
+      <Ionicons name="search" size={18} color={value.length > 0 ? '#7B61FF' : '#9ca3af'} style={styles.searchIcon} />
+      <TextInput
+        ref={inputRef}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder="חפש מועדון..."
+        placeholderTextColor="#4b5563"
+        style={styles.searchInput}
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+        onSubmitEditing={Keyboard.dismiss}
+      />
+      {value.length > 0 && (
+        <TouchableOpacity onPress={onClear} style={styles.searchClear} activeOpacity={0.7}>
+          <Ionicons name="close-circle" size={20} color="#6b7280" />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -74,14 +100,31 @@ function VenueCard({ club, selected, onPress }: { club: Club; selected: boolean;
 
 export default function MapScreen() {
   const webViewRef = useRef<any>(null);
+  const searchInputRef = useRef<TextInput>(null);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [mapCenter, setMapCenter] = useState({ lat: 32.0, lng: 34.85, zoom: 8 });
   const [filterCity, setFilterCity] = useState<string | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownAnim = useRef(new Animated.Value(0)).current;
+  const { query, setQuery, clear, filtered: searchFiltered } = useVenueSearch(venues);
+
+  useEffect(() => {
+    const shouldShow = query.trim().length > 0;
+    setShowDropdown(shouldShow);
+    Animated.spring(dropdownAnim, {
+      toValue: shouldShow ? 1 : 0,
+      useNativeDriver: true,
+      tension: 80,
+      friction: 12,
+    }).start();
+  }, [query]);
 
   const cities = [...new Set(venues.map(c => c.city))];
-  const filtered = filterCity ? venues.filter(c => c.city === filterCity) : venues;
+  const filtered = filterCity
+    ? searchFiltered.filter(c => c.city === filterCity)
+    : searchFiltered;
 
-  const buildMapHtml = (clubList: Club[], centerLat: number, centerLng: number, zoom: number) => {
+  const buildMapHtml = (clubList: Club[], centerLat: number, centerLng: number, zoom: number, selectedClubId?: number) => {
     const getLogoUri = (venue: Club) => {
       const logo = getVenueLogo(venue);
       if (!logo) return '';
@@ -192,6 +235,12 @@ export default function MapScreen() {
     }
   }
 
+  function highlightMarker(id) {
+    document.querySelectorAll('.marker-root').forEach(function(el) { el.classList.remove('active'); });
+    var el = document.getElementById('marker-' + id);
+    if (el) el.classList.add('active');
+  }
+
   var markers = L.markerClusterGroup({
     showCoverageOnHover: false,
     zoomToBoundsOnClick: true,
@@ -208,6 +257,7 @@ export default function MapScreen() {
 
   ${markersJs}
   map.addLayer(markers);
+  ${selectedClubId ? `highlightMarker(${selectedClubId});` : ''}
 </script>
 </body>
 </html>`;
@@ -216,6 +266,14 @@ export default function MapScreen() {
   const focusClub = (club: Club) => {
     setSelectedClub(club);
     setMapCenter({ lat: club.latitude, lng: club.longitude, zoom: 15 });
+  };
+
+  const handleSelectFromSearch = (club: Club) => {
+    Keyboard.dismiss();
+    setShowDropdown(false);
+    setQuery('');
+    setFilterCity(null);
+    focusClub(club);
   };
 
   const handleMapMessage = (e: { data?: string }) => {
@@ -248,12 +306,57 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterBar} contentContainerStyle={styles.filterBarContent}>
-        <FilterChip label="הכל" active={!filterCity} onPress={resetMap} />
-        {cities.map(city => (
-          <FilterChip key={city} label={city} active={filterCity === city} onPress={() => setFilterCity(city)} />
-        ))}
-      </ScrollView>
+      <View style={styles.searchWrapper}>
+        <SearchBar
+          value={query}
+          onChangeText={setQuery}
+          onClear={() => { clear(); setShowDropdown(false); }}
+          inputRef={searchInputRef}
+        />
+        {showDropdown && (
+          <Animated.View
+            style={[
+              styles.dropdown,
+              {
+                opacity: dropdownAnim,
+                transform: [{ translateY: dropdownAnim.interpolate({ inputRange: [0, 1], outputRange: [-8, 0] }) }],
+              },
+            ]}
+          >
+            {searchFiltered.length === 0 ? (
+              <View style={styles.dropdownEmpty}>
+                <Ionicons name="search-outline" size={22} color="#4b5563" />
+                <Text style={styles.dropdownEmptyText}>לא נמצאו מועדונים</Text>
+              </View>
+            ) : (
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                style={{ maxHeight: 260 }}
+              >
+                {searchFiltered.map((club, index) => (
+                  <TouchableOpacity
+                    key={club.id}
+                    style={[
+                      styles.dropdownRow,
+                      index < searchFiltered.length - 1 && styles.dropdownRowBorder,
+                    ]}
+                    onPress={() => handleSelectFromSearch(club)}
+                    activeOpacity={0.75}
+                  >
+                    <View style={[styles.dropdownDot, { backgroundColor: club.color }]} />
+                    <View style={styles.dropdownRowInfo}>
+                      <Text style={styles.dropdownRowName} numberOfLines={1}>{club.name}</Text>
+                      <Text style={styles.dropdownRowCity}>{club.city}</Text>
+                    </View>
+                    <Text style={[styles.dropdownRowRating, { color: club.color }]}>★ {club.rating}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            )}
+          </Animated.View>
+        )}
+      </View>
 
       <View style={styles.mapContainer}>
         {Platform.OS === 'web' ? (
@@ -289,11 +392,18 @@ export default function MapScreen() {
 
       <View style={styles.bottomPanel}>
         <View style={styles.bottomHandle} />
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardsContent}>
-          {filtered.map(club => (
-            <VenueCard key={club.id} club={club} selected={selectedClub?.id === club.id} onPress={() => focusClub(club)} />
-          ))}
-        </ScrollView>
+        {filtered.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="search-outline" size={28} color="#4b5563" />
+            <Text style={styles.emptyStateText}>לא נמצאו מועדונים</Text>
+          </View>
+        ) : (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardsContent}>
+            {filtered.map(club => (
+              <VenueCard key={club.id} club={club} selected={selectedClub?.id === club.id} onPress={() => focusClub(club)} />
+            ))}
+          </ScrollView>
+        )}
       </View>
 
       {selectedClub && (
@@ -391,6 +501,42 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: '#2A2A3C',
   },
+  searchWrapper: { paddingHorizontal: 16, paddingBottom: 8, zIndex: 100 },
+  searchBar: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#161622', borderRadius: 16,
+    borderWidth: 1.5, borderColor: '#2A2A3C',
+    paddingHorizontal: 14, paddingVertical: 11,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 8,
+    elevation: 4,
+  },
+  searchIcon: { marginRight: 10 },
+  searchInput: { flex: 1, color: '#fff', fontSize: 15, fontWeight: '500', padding: 0, textAlign: 'right' },
+  searchClear: { padding: 3, marginLeft: 6 },
+  dropdown: {
+    position: 'absolute', top: 54, left: 0, right: 0,
+    backgroundColor: '#161622', borderRadius: 16,
+    borderWidth: 1.5, borderColor: '#2A2A3C',
+    overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 20,
+    elevation: 20,
+    zIndex: 200,
+  },
+  dropdownRow: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 16, paddingVertical: 13,
+    gap: 12,
+  },
+  dropdownRowBorder: { borderBottomWidth: 1, borderBottomColor: '#1f1f30' },
+  dropdownDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
+  dropdownRowInfo: { flex: 1 },
+  dropdownRowName: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  dropdownRowCity: { fontSize: 12, color: '#6b7280', marginTop: 2 },
+  dropdownRowRating: { fontSize: 12, fontWeight: '700', flexShrink: 0 },
+  dropdownEmpty: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 24 },
+  dropdownEmptyText: { fontSize: 14, color: '#4b5563', fontWeight: '600' },
+  emptyState: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 28 },
+  emptyStateText: { fontSize: 14, color: '#4b5563', fontWeight: '600' },
   filterBar: { maxHeight: 56, backgroundColor: '#0B0B14' },
   filterBarContent: { paddingHorizontal: 16, paddingVertical: 8, gap: 10, flexDirection: 'row' },
   filterChip: {
