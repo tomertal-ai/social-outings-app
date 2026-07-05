@@ -14,12 +14,10 @@ export default function TabLayout() {
         tabBarShowLabel: true,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          href: null,
-        }}
-      />
+      <Tabs.Screen name="index"    options={{ href: null }} />
+      <Tabs.Screen name="parties"  options={{ href: null }} />
+      <Tabs.Screen name="my-events" options={{ href: null }} />
+      <Tabs.Screen name="profile"  options={{ href: null }} />
       <Tabs.Screen
         name="map"
         options={{
@@ -30,26 +28,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="parties"
+        name="favorites"
         options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="my-events"
-        options={{
-          title: 'כרטיסים',
+          title: 'שמורים',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'ticket' : 'ticket-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'אני',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person-circle' : 'person-circle-outline'} size={24} color={color} />
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={24} color={color} />
           ),
         }}
       />
