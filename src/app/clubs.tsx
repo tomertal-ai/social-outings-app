@@ -3,39 +3,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientButton from '../components/GradientButton';
+import { clubs } from '../data/clubs';
 
 export default function ClubsScreen() {
   const router = useRouter();
-
-  const mockClubs = [
-    {
-      id: 1,
-      name: 'The Block',
-      location: 'תל אביב, רחוב אלנבי 120',
-      rating: 4.5,
-      price: '₪80-120',
-      music: 'EDM, House',
-      isOpen: true,
-    },
-    {
-      id: 2,
-      name: 'Pasaz',
-      location: 'תל אביב, רחוב דיזנגוף 99',
-      rating: 4.2,
-      price: '₪100-150',
-      music: 'Hip-Hop, R&B',
-      isOpen: true,
-    },
-    {
-      id: 3,
-      name: 'Haoman 17',
-      location: 'ירושלים, רחוב האמנים 17',
-      rating: 4.7,
-      price: '₪90-130',
-      music: 'Trance, Techno',
-      isOpen: false,
-    },
-  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -59,21 +30,21 @@ export default function ClubsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>מועדונים מומלצים</Text>
           
-          {mockClubs.map((club) => (
+          {clubs.map((club) => (
             <View key={club.id} style={styles.clubCard}>
               <View style={styles.clubHeader}>
                 <Text style={styles.clubName}>{club.name}</Text>
-                <View style={[styles.statusBadge, club.isOpen ? styles.openBadge : styles.closedBadge]}>
-                  <Text style={styles.statusText}>{club.isOpen ? 'פתוח' : 'סגור'}</Text>
+                <View style={[styles.statusBadge, styles.openBadge]}>
+                  <Text style={styles.statusText}>{club.city}</Text>
                 </View>
               </View>
               
-              <Text style={styles.clubLocation}>📍 {club.location}</Text>
+              <Text style={styles.clubLocation}>📍 {club.address}</Text>
               
               <View style={styles.clubDetails}>
                 <Text style={styles.clubDetail}>⭐ {club.rating}</Text>
-                <Text style={styles.clubDetail}>💰 {club.price}</Text>
-                <Text style={styles.clubDetail}>🎵 {club.music}</Text>
+                <Text style={styles.clubDetail}>💰 {club.priceRange}</Text>
+                <Text style={styles.clubDetail}>🎵 {club.music.join(', ')}</Text>
               </View>
               
               <GradientButton onPress={() => {}} style={styles.bookButton}>

@@ -1,4 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import MaskedView from '@react-native-masked-view/masked-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -35,7 +37,15 @@ export default function WelcomeScreen() {
           <View style={styles.logoCircle}>
             <Logo size={120} showBackground={false} />
           </View>
-          <Text style={styles.appName}>יציאות חברתיות</Text>
+          <MaskedView maskElement={<Text style={styles.appName}>Outly</Text>}>
+            <LinearGradient
+              colors={['#2CB7FF', '#7B61FF', '#D946EF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+            >
+              <Text style={[styles.appName, { opacity: 0 }]}>Outly</Text>
+            </LinearGradient>
+          </MaskedView>
           <Text style={styles.tagline}>צא, תכיר, תהנה</Text>
         </View>
 

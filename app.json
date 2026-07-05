@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "social-outings-app",
-    "slug": "social-outings-app",
+    "name": "Outly",
+    "slug": "outly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "socialoutingsapp",
+    "scheme": "outly",
     "userInterfaceStyle": "dark",
     "ios": {
       "icon": "./assets/images/icon.png",
-      "bundleIdentifier": "com.anonymous.social-outings-app"
+      "bundleIdentifier": "com.outly.app"
     },
     "android": {
       "adaptiveIcon": {

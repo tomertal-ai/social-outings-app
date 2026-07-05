@@ -7,6 +7,7 @@ export default function RootLayout() {
       <Stack.Screen name="welcome" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="clubs" />
+      <Stack.Screen name="club/[id]" />
     </Stack>
   );
 }
