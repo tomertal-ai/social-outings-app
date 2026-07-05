@@ -8,7 +8,7 @@ import { clubs } from '../data/clubs';
 import { Club } from '../types';
 import { useClubSearch } from '../hooks/useClubSearch';
 import ClubSearchBar from '../components/clubs/ClubSearchBar';
-import ClubMap from '../components/clubs/ClubMap';
+import ClubMap, { MapBounds } from '../components/clubs/ClubMap';
 import ClubDetailModal from '../components/clubs/ClubDetailModal';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -25,6 +25,21 @@ export default function MapScreen() {
   const { query, setQuery, clear, filtered: searchFiltered } = useClubSearch(clubs);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['12%', '45%', '88%'], []);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+
+  const visibleClubs = useMemo(() => {
+    if (!mapBounds) return clubs;
+    return clubs.filter(c =>
+      c.latitude  <= mapBounds.north &&
+      c.latitude  >= mapBounds.south &&
+      c.longitude <= mapBounds.east  &&
+      c.longitude >= mapBounds.west
+    );
+  }, [mapBounds]);
+
+  const handleBoundsChange = useCallback((bounds: MapBounds) => {
+    setMapBounds(bounds);
+  }, []);
 
   useEffect(() => {
     const shouldShow = query.trim().length > 0;
@@ -126,6 +141,7 @@ export default function MapScreen() {
         selectedClubId={selectedClub?.id}
         onSelectClub={focusClub}
         onRecenter={resetMap}
+        onBoundsChange={handleBoundsChange}
       />
 
       <BottomSheet
@@ -136,7 +152,9 @@ export default function MapScreen() {
         handleIndicatorStyle={styles.sheetHandle}
       >
         <BottomSheetView style={styles.sheetContent}>
-          <Text style={styles.sheetTitle}>מועדונים באזור זה</Text>
+          <Text style={styles.sheetTitle}>
+            {`מועדונים באזור זה (${visibleClubs.length})`}
+          </Text>
         </BottomSheetView>
       </BottomSheet>
 

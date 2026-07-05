@@ -11,12 +11,20 @@ interface MapCenter {
   zoom: number;
 }
 
+export interface MapBounds {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}
+
 interface Props {
   clubs: Club[];
   center: MapCenter;
   selectedClubId?: number;
   onSelectClub: (club: Club) => void;
   onRecenter: () => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
 }
 
 function buildMapHtml(
@@ -125,6 +133,20 @@ function buildMapHtml(
     disableClusteringAtZoom: 17
   });
 
+  function emitBounds() {
+    var b = map.getBounds();
+    var msg = JSON.stringify({
+      type: 'bounds',
+      north: b.getNorth(), south: b.getSouth(),
+      east: b.getEast(), west: b.getWest()
+    });
+    if (window.ReactNativeWebView) { window.ReactNativeWebView.postMessage(msg); }
+    else if (window.parent) { window.parent.postMessage(msg, '*'); }
+  }
+
+  map.on('moveend', emitBounds);
+  map.on('zoomend', emitBounds);
+
   map.on('click', function(e) {
     if (!e.originalEvent || !e.originalEvent.target.closest('.marker-root')) {
       document.querySelectorAll('.marker-root').forEach(function(el) { el.classList.remove('active'); });
@@ -134,18 +156,21 @@ function buildMapHtml(
   ${markersJs}
   map.addLayer(markers);
   ${selectedClubId ? `highlightMarker(${selectedClubId});` : ''}
+  setTimeout(emitBounds, 300);
 </script>
 </body>
 </html>`;
 }
 
-export default function ClubMap({ clubs, center, selectedClubId, onSelectClub, onRecenter }: Props) {
+export default function ClubMap({ clubs, center, selectedClubId, onSelectClub, onRecenter, onBoundsChange }: Props) {
   const webViewRef = useRef<any>(null);
 
   const handleMessage = (e: { data?: string }) => {
     try {
       const data = JSON.parse(e.data || '{}');
-      if (data.clubId) {
+      if (data.type === 'bounds' && onBoundsChange) {
+        onBoundsChange({ north: data.north, south: data.south, east: data.east, west: data.west });
+      } else if (data.clubId) {
         const club = clubs.find(c => c.id === data.clubId);
         if (club) onSelectClub(club);
       }
