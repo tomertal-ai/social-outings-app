@@ -107,6 +107,8 @@ export default function MapScreen() {
     mass: 0.6, stiffness: 280, damping: 28, overshootClamping: false,
   });
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+  const [mapInteracting, setMapInteracting] = useState(false);
+  const mapInteractTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRefs = useRef<Record<number, number>>({});
 
   const visibleExperiences = useMemo(() => {
@@ -122,6 +124,10 @@ export default function MapScreen() {
 
   const handleBoundsChange = useCallback((bounds: MapBounds) => {
     setMapBounds(bounds);
+    // Mark map as interacting to prevent sheet from opening during zoom/pan
+    setMapInteracting(true);
+    if (mapInteractTimeoutRef.current) clearTimeout(mapInteractTimeoutRef.current);
+    mapInteractTimeoutRef.current = setTimeout(() => setMapInteracting(false), 600);
   }, []);
 
   const switchCategory = useCallback((cat: ExperienceCategory) => {
@@ -284,6 +290,8 @@ export default function MapScreen() {
         handleStyle={styles.sheetHandleArea as any}
         enableOverDrag={true}
         enablePanDownToClose={false}
+        enableHandlePanningGesture={!mapInteracting}
+        enableContentPanningGesture={!mapInteracting}
         keyboardBehavior="extend"
         android_keyboardInputMode="adjustResize"
       >
