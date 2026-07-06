@@ -13,7 +13,6 @@ import { experiencesByCategory, getExperienceLogo, getExperienceInitials } from 
 import { useExperienceSearch } from '../hooks/useClubSearch';
 import ClubSearchBar from '../components/clubs/ClubSearchBar';
 import ClubMap from '../components/clubs/ClubMap';
-import ClubDetailModal from '../components/clubs/ClubDetailModal';
 
 const CATEGORIES: ExperienceCategory[] = ['clubs', 'nature_parties', 'festivals', 'concerts'];
 const DEFAULT_CENTER = { lat: 32.0, lng: 34.85, zoom: 8 };
@@ -256,16 +255,9 @@ export default function MapScreen() {
     if (exp.latitude !== undefined && exp.longitude !== undefined) {
       setMapCenter({ lat: exp.latitude, lng: exp.longitude, zoom: 15 });
     }
-    // Expand sheet to mid if currently peeking
-    bottomSheetRef.current?.snapToIndex(1);
-    // Scroll list to card
-    setTimeout(() => {
-      const yOffset = cardRefs.current[exp.id];
-      if (yOffset !== undefined && sheetListRef.current) {
-        sheetListRef.current.scrollTo({ y: yOffset, animated: true });
-      }
-    }, 320);
-  }, []);
+    // Navigate directly to detail screen
+    router.push(`/club/${exp.id}`);
+  }, [router]);
 
   const handleSelectFromSearch = (exp: Experience) => {
     Keyboard.dismiss();
@@ -460,7 +452,6 @@ export default function MapScreen() {
         </BottomSheetScrollView>
       </BottomSheet>
 
-      <ClubDetailModal club={selected} onClose={() => setSelected(null)} onViewDetails={goToDetails} />
     </View>
   );
 }
