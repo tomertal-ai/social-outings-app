@@ -32,7 +32,7 @@ function useCardPressAnim() {
 }
 
 // ---------------------------------------------------------------------------
-// Compact card — ~20% smaller, clean
+// Rich card — cover gradient, prominent title, genre chips
 // ---------------------------------------------------------------------------
 interface CardProps {
   exp: Experience;
@@ -43,12 +43,15 @@ interface CardProps {
   onPress: () => void;
 }
 
-function CompactCard({ exp, index, total, isSelected, onLayout, onPress }: CardProps) {
+function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProps) {
   const { scale, onPressIn, onPressOut } = useCardPressAnim();
   const logo = getExperienceLogo(exp);
+  const isApprox = exp.locationStatus && exp.locationStatus !== 'fixed';
+  const cityLabel = exp.approximateArea?.regionName ?? exp.city;
+
   return (
     <Animated.View
-      style={{ transform: [{ scale }] }}
+      style={[styles.richCardWrap, { transform: [{ scale }] }, index < total - 1 && styles.richCardGap]}
       onLayout={e => onLayout(e.nativeEvent.layout.y)}
     >
       <TouchableOpacity
@@ -56,56 +59,83 @@ function CompactCard({ exp, index, total, isSelected, onLayout, onPress }: CardP
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         onPress={onPress}
-        style={[
-          styles.card,
-          index < total - 1 && styles.cardBorder,
-          isSelected && styles.cardSelected,
-        ]}
+        style={[styles.richCard, isSelected && { borderColor: exp.color + '80', borderWidth: 1.5 }]}
       >
-        {isSelected && <View style={[styles.selectedBar, { backgroundColor: exp.color }]} />}
+        {/* ── Cover ── */}
+        <View style={[styles.richCover, { backgroundColor: exp.color + '18' }]}>
+          {/* Gradient overlay bars for visual texture */}
+          <View style={[styles.richCoverAccent, { backgroundColor: exp.color + '30' }]} />
+          <View style={[styles.richCoverAccent2, { backgroundColor: exp.color + '15' }]} />
 
-        {/* Avatar */}
-        <View style={[styles.avatar, { borderColor: exp.color + '50' }]}>
-          {logo ? (
-            <Image source={logo} style={styles.avatarImg} />
-          ) : (
-            <View style={[styles.avatarFallback, { backgroundColor: exp.color + '20' }]}>
-              <Text style={[styles.avatarInitials, { color: exp.color }]}>
+          {/* Avatar centered on cover */}
+          <View style={[styles.richCoverAvatar, { borderColor: exp.color + '60', backgroundColor: exp.color + '25' }]}>
+            {logo ? (
+              <Image source={logo} style={styles.richCoverAvatarImg} />
+            ) : (
+              <Text style={[styles.richCoverInitials, { color: exp.color }]}>
                 {getExperienceInitials(exp)}
               </Text>
+            )}
+          </View>
+
+          {/* Approx badge top-right */}
+          {isApprox && (
+            <View style={styles.richApproxBadge}>
+              <Ionicons name="warning-outline" size={9} color="#f59e0b" />
+              <Text style={styles.richApproxText}>משוער</Text>
             </View>
           )}
+
+          {/* Selected accent bar */}
+          {isSelected && <View style={[styles.richSelectedBar, { backgroundColor: exp.color }]} />}
         </View>
 
-        {/* Info */}
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardName} numberOfLines={1}>{exp.name}</Text>
-          <View style={styles.cardMeta}>
+        {/* ── Body ── */}
+        <View style={styles.richBody}>
+          {/* Name */}
+          <Text style={styles.richName} numberOfLines={1}>{exp.name}</Text>
+
+          {/* City */}
+          <View style={styles.richCityRow}>
             <Ionicons
-              name={exp.locationStatus && exp.locationStatus !== 'fixed' ? 'location-outline' : 'location-sharp'}
-              size={10}
-              color={exp.locationStatus && exp.locationStatus !== 'fixed' ? '#f59e0b' : '#6b7280'}
+              name={isApprox ? 'location-outline' : 'location-sharp'}
+              size={11}
+              color={isApprox ? '#f59e0b' : '#6b7280'}
             />
-            <Text style={[
-              styles.cardCity,
-              exp.locationStatus && exp.locationStatus !== 'fixed' && styles.cardCityApprox,
-            ]} numberOfLines={1}>
-              {exp.approximateArea?.regionName ?? exp.city}
-              {exp.locationStatus && exp.locationStatus !== 'fixed' ? ' ·̃' : ''}
+            <Text style={[styles.richCity, isApprox && styles.richCityApprox]} numberOfLines={1}>
+              {cityLabel}
             </Text>
           </View>
-        </View>
 
-        {/* Right */}
-        <View style={styles.cardRight}>
-          {exp.rating !== undefined && (
-            <View style={styles.ratingRow}>
-              <Text style={[styles.ratingStar, { color: exp.color }]}>★</Text>
-              <Text style={styles.ratingVal}>{exp.rating}</Text>
-            </View>
-          )}
-          {!!exp.entryPrice && (
-            <Text style={styles.price} numberOfLines={1}>{exp.entryPrice}</Text>
+          {/* Rating + Price */}
+          <View style={styles.richMetaRow}>
+            {exp.rating !== undefined && (
+              <View style={styles.richRatingPill}>
+                <Text style={[styles.richRatingStar, { color: exp.color }]}>★</Text>
+                <Text style={styles.richRatingVal}>{exp.rating}</Text>
+              </View>
+            )}
+            {!!exp.entryPrice && (
+              <View style={styles.richPricePill}>
+                <Text style={styles.richPriceText}>{exp.entryPrice}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Genre chips */}
+          {exp.musicGenres && exp.musicGenres.length > 0 && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.richGenreScroll}
+              contentContainerStyle={styles.richGenreContent}
+            >
+              {exp.musicGenres.slice(0, 4).map(g => (
+                <View key={g} style={[styles.richGenreChip, { borderColor: exp.color + '40' }]}>
+                  <Text style={[styles.richGenreText, { color: exp.color }]}>{g}</Text>
+                </View>
+              ))}
+            </ScrollView>
           )}
         </View>
       </TouchableOpacity>
@@ -377,7 +407,7 @@ export default function MapScreen() {
           contentContainerStyle={styles.sheetList}
         >
           {visibleExperiences.map((exp, index) => (
-            <CompactCard
+            <RichCard
               key={exp.id}
               exp={exp}
               index={index}
@@ -476,41 +506,81 @@ const styles = StyleSheet.create({
   sheetClearText: { fontSize: 12, color: '#7B61FF', fontWeight: '600' },
   sheetList:      { paddingBottom: 40 },
 
-  // Compact card
-  card: {
-    flexDirection: 'row', alignItems: 'center', gap: 11,
-    paddingHorizontal: 16, paddingVertical: 10,
-    position: 'relative', overflow: 'hidden',
-  },
-  cardBorder:   { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#1f1f2e' },
-  cardSelected: { backgroundColor: '#1a1a2e' },
-  selectedBar: {
-    position: 'absolute', left: 0, top: 8, bottom: 8,
-    width: 3, borderRadius: 2,
+  // Rich card wrapper
+  richCardWrap: { paddingHorizontal: 12 },
+  richCardGap:  { marginBottom: 10 },
+  richCard: {
+    borderRadius: 18, overflow: 'hidden',
+    backgroundColor: '#161622',
+    borderWidth: 1, borderColor: '#1f1f30',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35, shadowRadius: 12, elevation: 8,
   },
 
-  // Avatar — 36px (was 42)
-  avatar: {
-    width: 36, height: 36, borderRadius: 11,
-    borderWidth: 1.5, overflow: 'hidden', flexShrink: 0,
+  // Cover
+  richCover: {
+    height: 80, width: '100%',
+    alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden', position: 'relative',
   },
-  avatarImg:      { width: '100%', height: '100%' },
-  avatarFallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  avatarInitials: { fontSize: 12, fontWeight: '800' },
+  richCoverAccent: {
+    position: 'absolute', top: -20, left: -30,
+    width: 160, height: 160, borderRadius: 80,
+  },
+  richCoverAccent2: {
+    position: 'absolute', bottom: -30, right: -20,
+    width: 120, height: 120, borderRadius: 60,
+  },
+  richCoverAvatar: {
+    width: 52, height: 52, borderRadius: 16,
+    borderWidth: 2, alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  richCoverAvatarImg:   { width: '100%', height: '100%' },
+  richCoverInitials:    { fontSize: 18, fontWeight: '800' },
+  richApproxBadge: {
+    position: 'absolute', top: 8, right: 8,
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    backgroundColor: '#1a1200', borderRadius: 8,
+    paddingHorizontal: 6, paddingVertical: 3,
+    borderWidth: 1, borderColor: '#f59e0b40',
+  },
+  richApproxText:   { fontSize: 10, color: '#f59e0b', fontWeight: '700' },
+  richSelectedBar: {
+    position: 'absolute', top: 0, left: 0, right: 0,
+    height: 3,
+  },
 
-  // Card text
-  cardInfo:      { flex: 1, gap: 2 },
-  cardName:      { fontSize: 13, fontWeight: '700', color: '#f3f4f6', letterSpacing: -0.1 },
-  cardMeta:      { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  cardCity:      { fontSize: 11, color: '#6b7280', fontWeight: '500' },
-  cardCityApprox:{ color: '#f59e0b' },
+  // Body
+  richBody:    { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 12, gap: 6 },
+  richName:    { fontSize: 16, fontWeight: '800', color: '#f9fafb', letterSpacing: -0.3 },
+  richCityRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  richCity:      { fontSize: 12, color: '#6b7280', fontWeight: '500' },
+  richCityApprox:{ color: '#f59e0b' },
 
-  // Card right
-  cardRight:  { alignItems: 'flex-end', gap: 2 },
-  ratingRow:  { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  ratingStar: { fontSize: 10 },
-  ratingVal:  { fontSize: 11, fontWeight: '700', color: '#f3f4f6' },
-  price:      { fontSize: 10, color: '#6b7280', fontWeight: '500' },
+  richMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  richRatingPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: '#1f1f2e', borderRadius: 8,
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  richRatingStar: { fontSize: 11 },
+  richRatingVal:  { fontSize: 12, fontWeight: '700', color: '#f3f4f6' },
+  richPricePill: {
+    backgroundColor: '#1f1f2e', borderRadius: 8,
+    paddingHorizontal: 8, paddingVertical: 3,
+  },
+  richPriceText: { fontSize: 12, color: '#9ca3af', fontWeight: '600' },
+
+  // Genre chips
+  richGenreScroll:  { marginTop: 2 },
+  richGenreContent: { gap: 6 },
+  richGenreChip: {
+    borderRadius: 20, borderWidth: 1,
+    paddingHorizontal: 10, paddingVertical: 3,
+    backgroundColor: 'transparent',
+  },
+  richGenreText: { fontSize: 11, fontWeight: '600' },
 
   // Empty
   emptyState: { alignItems: 'center', justifyContent: 'center', paddingTop: 40, gap: 10 },
