@@ -440,7 +440,7 @@ export default function MapScreen() {
               total={visibleExperiences.length}
               isSelected={selected?.id === exp.id}
               onLayout={(y: number) => { cardRefs.current[exp.id] = y; }}
-              onPress={() => { focusExperience(exp); goToDetails(exp); }}
+              onPress={() => focusExperience(exp)}
             />
           ))}
           {visibleExperiences.length === 0 && (
