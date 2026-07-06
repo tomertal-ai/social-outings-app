@@ -1,6 +1,6 @@
 import {
   View, Text, TextInput, ScrollView, TouchableOpacity,
-  Animated, Keyboard, StyleSheet, Image, Platform,
+  Animated, Keyboard, StyleSheet, Image, Platform, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -18,10 +18,11 @@ import ClubDetailModal from '../components/clubs/ClubDetailModal';
 const CATEGORIES: ExperienceCategory[] = ['clubs', 'nature_parties', 'festivals', 'concerts'];
 const DEFAULT_CENTER = { lat: 32.0, lng: 34.85, zoom: 8 };
 
-// Snap points: collapsed (peek), mid, full
-const SNAP_PEEK  = '11%';
-const SNAP_MID   = '42%';
-const SNAP_FULL  = '86%';
+// Fixed pixel snap points — independent of SafeAreaView
+const SCREEN_H   = Dimensions.get('window').height;
+const SNAP_PEEK  = 72;                       // grabber + one card row
+const SNAP_MID   = Math.round(SCREEN_H * 0.40);
+const SNAP_FULL  = Math.round(SCREEN_H * 0.82);
 
 function useCardPressAnim() {
   const scale = useRef(new Animated.Value(1)).current;
@@ -128,7 +129,7 @@ export default function MapScreen() {
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const sheetListRef   = useRef<any>(null);
-  const snapPoints     = useMemo(() => [SNAP_PEEK, SNAP_MID, SNAP_FULL], []);
+  const snapPoints = useMemo(() => [SNAP_PEEK, SNAP_MID, SNAP_FULL], []);
 
   const animationConfigs = useBottomSheetSpringConfigs({
     mass: 0.5, stiffness: 320, damping: 32, overshootClamping: false,
@@ -215,7 +216,19 @@ export default function MapScreen() {
   }, [visibleExperiences.length, activeCategory]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      {/* ── Map fills full screen ── */}
+      <ClubMap
+        experiences={categoryData}
+        center={mapCenter}
+        selectedId={selected?.id}
+        onSelect={focusExperience}
+        onRecenter={resetMap}
+        onBoundsChange={handleBoundsChange}
+      />
+
+      {/* ── Floating overlay: header + categories + search ── */}
+      <SafeAreaView style={styles.overlay} pointerEvents="box-none">
 
       {/* ── Floating header overlay ── */}
       <View style={styles.header} pointerEvents="box-none">
@@ -258,7 +271,7 @@ export default function MapScreen() {
       </ScrollView>
 
       {/* ── Search bar ── */}
-      <View style={styles.searchWrapper}>
+      <View style={styles.searchWrapper} pointerEvents="box-none">
         <ClubSearchBar
           value={query}
           onChangeText={setQuery}
@@ -309,15 +322,7 @@ export default function MapScreen() {
         )}
       </View>
 
-      {/* ── Map (fills everything) ── */}
-      <ClubMap
-        experiences={categoryData}
-        center={mapCenter}
-        selectedId={selected?.id}
-        onSelect={focusExperience}
-        onRecenter={resetMap}
-        onBoundsChange={handleBoundsChange}
-      />
+      </SafeAreaView>
 
       {/* ── Bottom Sheet ── */}
       <BottomSheet
@@ -371,7 +376,7 @@ export default function MapScreen() {
       </BottomSheet>
 
       <ClubDetailModal club={selected} onClose={() => setSelected(null)} onViewDetails={goToDetails} />
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -380,6 +385,12 @@ export default function MapScreen() {
 // ---------------------------------------------------------------------------
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0B0B14' },
+
+  // Floating overlay on top of map
+  overlay: {
+    position: 'absolute', top: 0, left: 0, right: 0,
+    zIndex: 10,
+  },
 
   // Header
   header: {
@@ -408,7 +419,7 @@ const styles = StyleSheet.create({
   categoryLabelActive: { color: '#fff' },
 
   // Search
-  searchWrapper: { paddingHorizontal: 16, paddingBottom: 8, zIndex: 100 },
+  searchWrapper: { paddingHorizontal: 16, paddingBottom: 8, zIndex: 100, pointerEvents: 'box-none' as any },
   dropdown: {
     position: 'absolute', top: 54, left: 0, right: 0,
     backgroundColor: '#161622', borderRadius: 16,
