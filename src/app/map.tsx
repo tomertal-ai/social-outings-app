@@ -120,7 +120,7 @@ const TAB_BAR_HEIGHT = 60; // approximate tab bar height
 
 export default function MapScreen() {
   const router = useRouter();
-  const { bottom: bottomInset } = useSafeAreaInsets();
+  const { top: topInset, bottom: bottomInset } = useSafeAreaInsets();
   const searchInputRef = useRef<TextInput>(null);
   const [activeCategory, setActiveCategory] = useState<ExperienceCategory>('clubs');
   const [selected, setSelected]   = useState<Experience | null>(null);
@@ -231,7 +231,7 @@ export default function MapScreen() {
       />
 
       {/* ── Floating overlay: header + categories + search ── */}
-      <SafeAreaView style={styles.overlay} pointerEvents="box-none">
+      <View style={[styles.overlay, { paddingTop: topInset - 4 }]} pointerEvents="box-none">
 
       {/* ── Floating header overlay ── */}
       <View style={styles.header} pointerEvents="box-none">
@@ -325,7 +325,7 @@ export default function MapScreen() {
         })}
       </ScrollView>
 
-      </SafeAreaView>
+      </View>
 
       {/* ── Bottom Sheet ── */}
       <BottomSheet
