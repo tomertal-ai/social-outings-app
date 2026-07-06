@@ -99,6 +99,13 @@ const clubsData: Experience[] = [
   {
     id: 5, category: 'clubs', verificationStatus: 'verified',
     coverImageUri: 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=85',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=85',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&q=85',
+    ],
     name: 'Gagarin Club', initials: 'GC', color: '#64748b',
     city: 'Tel Aviv', address: '13 Kibbutz Galuyot Rd, Tel Aviv',
     latitude: 32.0520, longitude: 34.7650, locationStatus: 'fixed',
@@ -113,6 +120,13 @@ const clubsData: Experience[] = [
   {
     id: 6, category: 'clubs', verificationStatus: 'verified',
     coverImageUri: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=85',
+      'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=900&q=85',
+      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=900&q=85',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&q=85',
+      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=85',
+    ],
     name: 'Atlanta TLV', initials: 'AT', color: '#0ea5e9',
     city: 'Tel Aviv', address: '30 Ibn Gavirol St, Tel Aviv',
     latitude: 32.0853, longitude: 34.7818, locationStatus: 'fixed',
@@ -127,6 +141,14 @@ const clubsData: Experience[] = [
   {
     id: 7, category: 'clubs', verificationStatus: 'verified',
     coverImageUri: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=900&q=85',
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=85',
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=85',
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=900&q=85',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&q=85',
+    ],
     name: 'The Cappella', initials: 'CP', color: '#d97706',
     city: 'Tel Aviv', address: "28 HaArba'a St, Tel Aviv",
     latitude: 32.0697, longitude: 34.7897, locationStatus: 'fixed',
@@ -141,6 +163,14 @@ const clubsData: Experience[] = [
   },
   {
     id: 8, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&q=85',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&q=85',
+      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=900&q=85',
+    ],
     name: 'Comfort 13', initials: 'C1', color: '#6366f1',
     city: 'Tel Aviv', address: '13 Comfort St, Tel Aviv',
     latitude: 32.0580, longitude: 34.7640, locationStatus: 'fixed',
@@ -155,6 +185,14 @@ const clubsData: Experience[] = [
   {
     id: 9, category: 'clubs', verificationStatus: 'needs_verification',
     verificationNotes: 'Address and exact hours need re-confirmation — club re-opened after renovation.',
+    coverImageUri: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=85',
+      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=85',
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=85',
+      'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=900&q=85',
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=85',
+    ],
     name: 'Bavel TLV', initials: 'BV', color: '#10b981',
     city: 'Tel Aviv', address: 'Tel Aviv (exact address TBC)',
     latitude: 32.0845, longitude: 34.7795, locationStatus: 'fixed',
@@ -169,6 +207,13 @@ const clubsData: Experience[] = [
   {
     id: 10, category: 'clubs', verificationStatus: 'verified',
     coverImageUri: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=900&q=85',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&q=85',
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=900&q=85',
+    ],
     name: 'Duplex Club', initials: 'DC', color: '#f97316',
     city: 'Tel Aviv', address: 'Florentin, Tel Aviv',
     latitude: 32.0565, longitude: 34.7720, locationStatus: 'fixed',
@@ -182,6 +227,14 @@ const clubsData: Experience[] = [
   },
   {
     id: 11, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=900&q=85',
+      'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&q=85',
+      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=85',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+    ],
     name: 'Boiler 02', initials: 'B0', color: '#f59e0b',
     city: 'Jerusalem', address: '28 Hebron Rd, Jerusalem',
     latitude: 31.7540, longitude: 35.2135, locationStatus: 'fixed',
@@ -196,6 +249,13 @@ const clubsData: Experience[] = [
   {
     id: 12, category: 'clubs', verificationStatus: 'verified',
     coverImageUri: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&q=85',
+      'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=900&q=85',
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=85',
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=85',
+      'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=85',
+    ],
     name: 'Factory Haifa', initials: 'FC', color: '#6366f1',
     city: 'Haifa', address: '110 HaLutzei HaTaasiya St, Haifa',
     latitude: 32.8070, longitude: 34.9650, locationStatus: 'fixed',
@@ -210,6 +270,13 @@ const clubsData: Experience[] = [
   {
     id: 13, category: 'clubs', verificationStatus: 'verified',
     coverImageUri: 'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=900&q=85',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+      'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=900&q=85',
+      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=900&q=85',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+    ],
     name: 'Selena Eilat', initials: 'SL', color: '#f59e0b',
     city: 'Eilat', address: '8 Carmel St, Eilat',
     latitude: 29.5585, longitude: 34.9480, locationStatus: 'fixed',
@@ -225,6 +292,13 @@ const clubsData: Experience[] = [
   {
     id: 14, category: 'clubs', verificationStatus: 'verified',
     coverImageUri: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=85',
+      'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=900&q=85',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&q=85',
+      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=85',
+    ],
     name: 'Jimmy Who', initials: 'JW', color: '#f43f5e',
     city: 'Tel Aviv', address: '24 Rothschild Blvd, Tel Aviv',
     latitude: 32.0632, longitude: 34.7708, locationStatus: 'fixed',
@@ -239,6 +313,14 @@ const clubsData: Experience[] = [
   {
     id: 15, category: 'clubs', verificationStatus: 'needs_verification',
     verificationNotes: 'Exact address and current operating status need re-confirmation.',
+    coverImageUri: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=85',
+      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=900&q=85',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+      'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=900&q=85',
+      'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=900&q=85',
+    ],
     name: 'Valium Club', initials: 'VC', color: '#6366f1',
     city: 'Tel Aviv', address: '1 Ben Yehuda St, Tel Aviv',
     latitude: 32.0775, longitude: 34.7685, locationStatus: 'fixed',
@@ -251,6 +333,14 @@ const clubsData: Experience[] = [
   },
   {
     id: 16, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=900&q=85',
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=900&q=85',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=85',
+      'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=900&q=85',
+    ],
     name: 'HIVE Tel Aviv', initials: 'HV', color: '#a855f7',
     city: 'Tel Aviv', address: '33 Rothschild Blvd, Tel Aviv',
     latitude: 32.0638, longitude: 34.7742, locationStatus: 'fixed',
@@ -264,6 +354,14 @@ const clubsData: Experience[] = [
   },
   {
     id: 17, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=900&q=85',
+      'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=900&q=85',
+      'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=900&q=85',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&q=85',
+      'https://images.unsplash.com/photo-1570872626485-d8ffea69f463?w=900&q=85',
+    ],
     name: 'Rabbit Club', initials: 'RC', color: '#84cc16',
     city: 'Tel Aviv', address: '14 Rothschild Blvd, Tel Aviv',
     latitude: 32.0650, longitude: 34.7805, locationStatus: 'fixed',
@@ -277,6 +375,14 @@ const clubsData: Experience[] = [
   },
   {
     id: 18, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.unsplash.com/photo-1570872626485-d8ffea69f463?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1570872626485-d8ffea69f463?w=900&q=85',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+      'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=900&q=85',
+      'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=900&q=85',
+      'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=900&q=85',
+    ],
     name: 'Pergamon Club', initials: 'PG', color: '#14b8a6',
     city: 'Jerusalem', address: '1 Yohanan Horkanos St, Jerusalem',
     latitude: 31.7760, longitude: 35.2140, locationStatus: 'fixed',
@@ -290,6 +396,14 @@ const clubsData: Experience[] = [
   },
   {
     id: 19, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=800&q=80',
+    photos: [
+      'https://images.unsplash.com/photo-1471478331149-c72f17e33c73?w=900&q=85',
+      'https://images.unsplash.com/photo-1570872626485-d8ffea69f463?w=900&q=85',
+      'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=900&q=85',
+      'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=900&q=85',
+      'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=85',
+    ],
     name: 'Big Place', initials: 'BP', color: '#8b5cf6',
     city: 'Herzliya', address: '9 HaChoshelim St, Herzliya',
     latitude: 32.1650, longitude: 34.8360, locationStatus: 'fixed',
