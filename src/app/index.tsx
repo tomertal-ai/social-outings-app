@@ -94,9 +94,16 @@ export default function SplashScreen() {
           alignItems: 'center',
         }}
       >
-        <MaskedView maskElement={<Text style={styles.appName}>Outly</Text>}>
+        <MaskedView
+          style={styles.gradientWrapper}
+          maskElement={
+            <View style={styles.gradientWrapper}>
+              <Text style={styles.appName}>Outly</Text>
+            </View>
+          }
+        >
           <LinearGradient
-            colors={['#2CB7FF', '#7B61FF', '#C850C0']}
+            colors={['#38BDF8', '#818CF8', '#A855F7']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.gradientText}
@@ -127,10 +134,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
     marginBottom: 6,
   },
-  gradientText: {
-    height: 46,
-    width: 140,
+  gradientWrapper: {
+    alignSelf: 'center',
     marginBottom: 6,
+  },
+  gradientText: {
+    height: 50,
+    width: 160,
   },
   tagline: {
     fontSize: 15,
