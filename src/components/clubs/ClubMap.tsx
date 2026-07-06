@@ -2,8 +2,8 @@ import { View, Image, TouchableOpacity, Platform, StyleSheet } from 'react-nativ
 import { useRef, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import WebView from 'react-native-webview';
-import { Club } from '../../types';
-import { getClubLogo, getClubInitials } from '../../data/clubs';
+import { Experience, MapBounds } from '../../types';
+import { getExperienceLogo, getExperienceInitials } from '../../data/experiences';
 
 interface MapCenter {
   lat: number;
@@ -11,31 +11,24 @@ interface MapCenter {
   zoom: number;
 }
 
-export interface MapBounds {
-  north: number;
-  south: number;
-  east: number;
-  west: number;
-}
-
 interface Props {
-  clubs: Club[];
+  experiences: Experience[];
   center: MapCenter;
-  selectedClubId?: number;
-  onSelectClub: (club: Club) => void;
+  selectedId?: number;
+  onSelect: (e: Experience) => void;
   onRecenter: () => void;
   onBoundsChange?: (bounds: MapBounds) => void;
 }
 
 function buildMapHtml(
-  clubList: Club[],
+  list: Experience[],
   centerLat: number,
   centerLng: number,
   zoom: number,
-  selectedClubId?: number
+  selectedId?: number
 ): string {
-  const getLogoUri = (club: Club) => {
-    const logo = getClubLogo(club);
+  const getLogoUri = (e: Experience) => {
+    const logo = getExperienceLogo(e);
     if (!logo) return '';
     if (Platform.OS === 'web') return '';
     try {
@@ -45,11 +38,11 @@ function buildMapHtml(
     }
   };
 
-  const markersJs = clubList.map(c => {
+  const markersJs = list.map(c => {
     const logoUri = getLogoUri(c);
     const avatar = logoUri
       ? `<img class="marker-avatar" src="${logoUri}" alt="${c.name}" />`
-      : `<div class="marker-initials" style="background-color:${c.color};">${getClubInitials(c)}</div>`;
+      : `<div class="marker-initials" style="background-color:${c.color};">${getExperienceInitials(c)}</div>`;
     return `
     var icon${c.id} = L.divIcon({
       html: \`<div class="marker-root" id="marker-${c.id}" onclick="selectMarker(${c.id})">
@@ -155,14 +148,14 @@ function buildMapHtml(
 
   ${markersJs}
   map.addLayer(markers);
-  ${selectedClubId ? `highlightMarker(${selectedClubId});` : ''}
+  ${selectedId ? `highlightMarker(${selectedId});` : ''}
   setTimeout(emitBounds, 300);
 </script>
 </body>
 </html>`;
 }
 
-export default function ClubMap({ clubs, center, selectedClubId, onSelectClub, onRecenter, onBoundsChange }: Props) {
+export default function ClubMap({ experiences, center, selectedId, onSelect, onRecenter, onBoundsChange }: Props) {
   const webViewRef = useRef<any>(null);
 
   const handleMessage = (e: { data?: string }) => {
@@ -171,14 +164,14 @@ export default function ClubMap({ clubs, center, selectedClubId, onSelectClub, o
       if (data.type === 'bounds' && onBoundsChange) {
         onBoundsChange({ north: data.north, south: data.south, east: data.east, west: data.west });
       } else if (data.clubId) {
-        const club = clubs.find(c => c.id === data.clubId);
-        if (club) onSelectClub(club);
+        const found = experiences.find(c => c.id === data.clubId);
+        if (found) onSelect(found);
       }
     } catch {}
   };
 
   const mapKey = `${center.lat}-${center.lng}-${center.zoom}`;
-  const html = buildMapHtml(clubs, center.lat, center.lng, center.zoom, selectedClubId);
+  const html = buildMapHtml(experiences, center.lat, center.lng, center.zoom, selectedId);
 
   return (
     <View style={styles.container}>

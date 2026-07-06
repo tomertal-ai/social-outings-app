@@ -1,10 +1,10 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Club } from '../../types';
+import { Experience } from '../../types';
 import ClubAvatar from './ClubAvatar';
 
 interface Props {
-  club: Club;
+  club: Experience;
   selected: boolean;
   onPress: () => void;
   onDetails?: () => void;
@@ -27,7 +27,7 @@ export default function ClubCard({ club, selected, onPress, onDetails }: Props) 
         <View style={styles.meta}>
           <Text style={[styles.rating, { color: club.color }]}>★ {club.rating}</Text>
           <Text style={styles.dot}>•</Text>
-          <Text style={styles.price}>{club.priceRange}</Text>
+          <Text style={styles.price}>{club.entryPrice}</Text>
         </View>
       </View>
       <TouchableOpacity onPress={onDetails ?? onPress} hitSlop={8} activeOpacity={0.7}>

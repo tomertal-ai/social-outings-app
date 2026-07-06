@@ -6,16 +6,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { clubs } from '../../data/clubs';
-import { getClubLogo, getClubInitials } from '../../data/clubs';
-import { Club } from '../../types';
+import { clubs } from '../../data/experiences';
+import { getExperienceLogo, getExperienceInitials } from '../../data/experiences';
+import { Experience } from '../../types';
 
 // ---------------------------------------------------------------------------
 // Mock data — replace with real persistence later
 // ---------------------------------------------------------------------------
-const MOCK_SAVED: Club[] = [clubs[0], clubs[2], clubs[5]].filter(Boolean);
+const MOCK_SAVED: Experience[] = [clubs[0], clubs[2], clubs[5]].filter(Boolean);
 
-const MOCK_HISTORY: Array<{ club: Club; visitedAt: string }> = [
+const MOCK_HISTORY: Array<{ club: Experience; visitedAt: string }> = [
   { club: clubs[1], visitedAt: 'אתמול' },
   { club: clubs[3], visitedAt: 'לפני 3 ימים' },
   { club: clubs[0], visitedAt: 'לפני שבוע' },
@@ -25,9 +25,9 @@ const MOCK_HISTORY: Array<{ club: Club; visitedAt: string }> = [
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
-function ClubRow({ club, subtitle, onPress }: { club: Club; subtitle: string; onPress: () => void }) {
+function ClubRow({ club, subtitle, onPress }: { club: Experience; subtitle: string; onPress: () => void }) {
   const scale = useRef(new Animated.Value(1)).current;
-  const logo = getClubLogo(club);
+  const logo = getExperienceLogo(club);
   const onPressIn  = () => Animated.spring(scale, { toValue: 0.97, useNativeDriver: true, speed: 50, bounciness: 0 }).start();
   const onPressOut = () => Animated.spring(scale, { toValue: 1,    useNativeDriver: true, speed: 30, bounciness: 4 }).start();
 
@@ -45,7 +45,7 @@ function ClubRow({ club, subtitle, onPress }: { club: Club; subtitle: string; on
             <Image source={logo} style={styles.avatarImg} />
           ) : (
             <View style={[styles.avatarFallback, { backgroundColor: club.color + '22' }]}>
-              <Text style={[styles.avatarInitials, { color: club.color }]}>{getClubInitials(club)}</Text>
+              <Text style={[styles.avatarInitials, { color: club.color }]}>{getExperienceInitials(club)}</Text>
             </View>
           )}
         </View>
@@ -143,7 +143,7 @@ export default function FavoritesScreen() {
               <View key={club.id}>
                 <ClubRow
                   club={club}
-                  subtitle={`${club.city} · ${club.music.slice(0, 2).join(', ')}`}
+                  subtitle={`${club.city} · ${(club.musicGenres ?? []).slice(0, 2).join(', ')}`}
                   onPress={() => router.push(`/club/${club.id}`)}
                 />
                 {i < MOCK_SAVED.length - 1 && <View style={styles.separator} />}

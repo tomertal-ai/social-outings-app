@@ -1,22 +1,20 @@
 import { useState, useMemo } from 'react';
-import { Club } from '../types';
+import { Experience } from '../types';
 
 function normalizeText(text: string): string {
   return text.toLowerCase().trim().replace(/\s+/g, ' ');
 }
 
-export function searchClubs(clubList: Club[], query: string): Club[] {
-  if (!query || query.trim() === '') return clubList;
-
+export function searchExperiences(list: Experience[], query: string): Experience[] {
+  if (!query || query.trim() === '') return list;
   const normalized = normalizeText(query);
-
-  return clubList.filter(club => {
+  return list.filter(e => {
     const searchable = [
-      club.name,
-      club.city,
-      club.address,
-      ...club.music,
-      ...club.tags,
+      e.name,
+      e.city,
+      e.address,
+      ...(e.musicGenres ?? []),
+      ...(e.tags ?? []),
     ]
       .join(' ')
       .toLowerCase();
@@ -24,20 +22,14 @@ export function searchClubs(clubList: Club[], query: string): Club[] {
   });
 }
 
-export function useClubSearch(clubList: Club[]) {
+export function useExperienceSearch(list: Experience[]) {
   const [query, setQuery] = useState('');
-
-  const filtered = useMemo(
-    () => searchClubs(clubList, query),
-    [clubList, query]
-  );
-
+  const filtered = useMemo(() => searchExperiences(list, query), [list, query]);
   const clear = () => setQuery('');
-
-  return {
-    query,
-    setQuery,
-    clear,
-    filtered,
-  };
+  return { query, setQuery, clear, filtered };
 }
+
+/** @deprecated use useExperienceSearch */
+export const useClubSearch = useExperienceSearch;
+/** @deprecated use searchExperiences */
+export const searchClubs = searchExperiences;

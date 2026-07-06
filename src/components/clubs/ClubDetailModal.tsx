@@ -1,13 +1,13 @@
 import { View, Text, ScrollView, TouchableOpacity, Modal, Linking, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Club } from '../../types';
+import { Experience } from '../../types';
 import ClubAvatar from './ClubAvatar';
 
 interface Props {
-  club: Club | null;
+  club: Experience | null;
   onClose: () => void;
-  onViewDetails?: (club: Club) => void;
+  onViewDetails?: (club: Experience) => void;
 }
 
 function stars(r: number) {
@@ -49,7 +49,7 @@ export default function ClubDetailModal({ club, onClose, onViewDetails }: Props)
               <View style={styles.ratingRow}>
                 <Text style={[styles.ratingStars, { color: club.color }]}>{stars(club.rating)}</Text>
                 <Text style={styles.ratingNum}>{club.rating}</Text>
-                <Text style={styles.ratingCount}>• {club.capacity} איש</Text>
+                {club.amenities?.length ? <Text style={styles.ratingCount}>• {club.amenities[0]}</Text> : null}
               </View>
             </View>
 
@@ -60,8 +60,8 @@ export default function ClubDetailModal({ club, onClose, onViewDetails }: Props)
                 { icon: 'cash-outline', label: 'כניסה', val: club.entryPrice },
                 { icon: 'person-outline', label: "גיל מינ׳", val: club.minAge + '+' },
                 { icon: 'location-outline', label: 'כתובת', val: club.address },
-                { icon: 'musical-notes-outline', label: 'מוזיקה', val: club.music.join(', ') },
-              ].map((item, idx) => (
+                { icon: 'musical-notes-outline', label: 'מוזיקה', val: (club.musicGenres ?? []).join(', ') },
+              ].filter(item => !!item.val).map((item, idx) => (
                 <View key={idx} style={styles.infoBox}>
                   <Ionicons name={item.icon as any} size={18} color={club.color} />
                   <Text style={styles.infoLabel}>{item.label}</Text>
@@ -70,16 +70,18 @@ export default function ClubDetailModal({ club, onClose, onViewDetails }: Props)
               ))}
             </View>
 
+            {(club.musicGenres ?? []).length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>סוגי מוזיקה</Text>
               <View style={styles.tagsRow}>
-                {club.music.map(m => (
+                {(club.musicGenres ?? []).map((m: string) => (
                   <View key={m} style={[styles.musicTag, { backgroundColor: club.color + '16', borderColor: club.color + '40' }]}>
                     <Text style={[styles.musicTagText, { color: club.color }]}>{m}</Text>
                   </View>
                 ))}
               </View>
             </View>
+            )}
 
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>מאפיינים</Text>
@@ -95,13 +97,13 @@ export default function ClubDetailModal({ club, onClose, onViewDetails }: Props)
             {/* Action buttons */}
             <View style={styles.actionsRow}>
               {!!club.instagram && (
-                <TouchableOpacity style={styles.actionBtn} onPress={() => openLink(club.instagram)} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => openLink(club.instagram!)} activeOpacity={0.7}>
                   <Ionicons name="logo-instagram" size={18} color="#E1306C" />
                   <Text style={styles.actionBtnText}>Instagram</Text>
                 </TouchableOpacity>
               )}
               {!!club.website && (
-                <TouchableOpacity style={styles.actionBtn} onPress={() => openLink(club.website)} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => openLink(club.website!)} activeOpacity={0.7}>
                   <Ionicons name="globe-outline" size={18} color="#60a5fa" />
                   <Text style={styles.actionBtnText}>אתר</Text>
                 </TouchableOpacity>
@@ -109,8 +111,8 @@ export default function ClubDetailModal({ club, onClose, onViewDetails }: Props)
             </View>
 
             {/* Ticket CTA */}
-            {club.ticketLink ? (
-              <TouchableOpacity activeOpacity={0.85} onPress={() => openLink(club.ticketLink)} style={styles.ticketWrap}>
+            {club.ticketUrl ? (
+              <TouchableOpacity activeOpacity={0.85} onPress={() => openLink(club.ticketUrl!)} style={styles.ticketWrap}>
                 <LinearGradient
                   colors={['#2CB7FF', '#7B61FF', '#D946EF']}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}

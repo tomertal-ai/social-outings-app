@@ -1,14 +1,14 @@
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { Club } from '../../types';
-import { getClubLogo, getClubInitials } from '../../data/clubs';
+import { Experience } from '../../types';
+import { getExperienceLogo, getExperienceInitials } from '../../data/experiences';
 
 interface Props {
-  club: Club;
+  club: Experience;
   size: number;
 }
 
 export default function ClubAvatar({ club, size }: Props) {
-  const logo = getClubLogo(club);
+  const logo = getExperienceLogo(club);
   const radius = size / 2;
 
   if (logo) {
@@ -21,7 +21,7 @@ export default function ClubAvatar({ club, size }: Props) {
 
   return (
     <View style={[styles.wrap, { width: size, height: size, borderRadius: radius, backgroundColor: club.color, borderColor: club.color + '80' }]}>
-      <Text style={[styles.initials, { fontSize: size * 0.4 }]}>{getClubInitials(club)}</Text>
+      <Text style={[styles.initials, { fontSize: size * 0.4 }]}>{getExperienceInitials(club)}</Text>
     </View>
   );
 }

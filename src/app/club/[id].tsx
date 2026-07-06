@@ -7,7 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { clubs } from '../../data/clubs';
+import { allExperiences } from '../../data/experiences';
 import ClubAvatar from '../../components/clubs/ClubAvatar';
 
 function InfoBox({ icon, label, value, color }: { icon: string; label: string; value: string; color: string }) {
@@ -65,7 +65,7 @@ function BuyTicketsButton({ url, color }: { url: string; color: string }) {
 export default function ClubDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const club = clubs.find(c => String(c.id) === id);
+  const club = allExperiences.find(c => String(c.id) === id);
   const [isSaved, setIsSaved] = useState(false);
   const heartScale = useRef(new Animated.Value(1)).current;
 
@@ -87,7 +87,7 @@ export default function ClubDetailScreen() {
     if (url) Linking.openURL(url).catch(() => {});
   };
 
-  const ticketUrl  = club.ticketLink || club.website;
+  const ticketUrl  = club.ticketUrl || club.website;
   const hasTicket  = !!ticketUrl;
   const hasInstagram = !!club.instagram;
   const hasWebsite   = !!club.website;
@@ -154,19 +154,22 @@ export default function ClubDetailScreen() {
 
         {/* Info Grid — MVP relevant only */}
         <View style={styles.infoGrid}>
-          <InfoBox icon="time-outline"     label="שעות"    value={club.hours}          color={club.color} />
-          <InfoBox icon="calendar-outline" label="ימים"    value={club.openDays}       color={club.color} />
-          <InfoBox icon="cash-outline"     label="כניסה"   value={club.entryPrice}     color={club.color} />
-          <InfoBox icon="person-outline"   label="גיל מינ׳" value={`${club.minAge}+`}  color={club.color} />
+          {!!club.hours    && <InfoBox icon="time-outline"     label="שעות"    value={club.hours}           color={club.color} />}
+          {!!club.openDays && <InfoBox icon="calendar-outline" label="ימים"    value={club.openDays}        color={club.color} />}
+          {!!club.startDate && <InfoBox icon="calendar-outline" label="תאריך" value={club.startDate + (club.endDate ? ` — ${club.endDate}` : '')} color={club.color} />}
+          <InfoBox icon="cash-outline"     label="כניסה"   value={club.entryPrice}      color={club.color} />
+          {club.minAge !== undefined && <InfoBox icon="person-outline" label="גיל מינ׳" value={`${club.minAge}+`} color={club.color} />}
         </View>
 
         {/* Music */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>מוזיקה</Text>
-          <View style={styles.tagsRow}>
-            {club.music.map(m => <Tag key={m} label={m} color={club.color} filled />)}
+        {club.musicGenres && club.musicGenres.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>מוזיקה / ז'אנר</Text>
+            <View style={styles.tagsRow}>
+              {club.musicGenres.map(m => <Tag key={m} label={m} color={club.color} filled />)}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Tags */}
         {club.tags.length > 0 && (
@@ -182,13 +185,13 @@ export default function ClubDetailScreen() {
         {(hasInstagram || hasWebsite) && (
           <View style={styles.linksRow}>
             {hasInstagram && (
-              <TouchableOpacity style={styles.linkBtn} onPress={() => openLink(club.instagram)} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.linkBtn} onPress={() => openLink(club.instagram!)} activeOpacity={0.7}>
                 <Ionicons name="logo-instagram" size={18} color="#E1306C" />
                 <Text style={styles.linkBtnText}>Instagram</Text>
               </TouchableOpacity>
             )}
             {hasWebsite && (
-              <TouchableOpacity style={styles.linkBtn} onPress={() => openLink(club.website)} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.linkBtn} onPress={() => openLink(club.website!)} activeOpacity={0.7}>
                 <Ionicons name="globe-outline" size={18} color="#60a5fa" />
                 <Text style={styles.linkBtnText}>Website</Text>
               </TouchableOpacity>

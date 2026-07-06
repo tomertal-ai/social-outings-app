@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientButton from '../components/GradientButton';
-import { clubs } from '../data/clubs';
+import { clubs } from '../data/experiences';
 
 export default function ClubsScreen() {
   const router = useRouter();
@@ -43,8 +43,8 @@ export default function ClubsScreen() {
               
               <View style={styles.clubDetails}>
                 <Text style={styles.clubDetail}>⭐ {club.rating}</Text>
-                <Text style={styles.clubDetail}>💰 {club.priceRange}</Text>
-                <Text style={styles.clubDetail}>🎵 {club.music.join(', ')}</Text>
+                <Text style={styles.clubDetail}>💰 {club.entryPrice}</Text>
+                <Text style={styles.clubDetail}>🎵 {(club.musicGenres ?? []).join(', ')}</Text>
               </View>
               
               <GradientButton onPress={() => {}} style={styles.bookButton}>

@@ -5,13 +5,14 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
-import { clubs } from '../data/clubs';
-import { Club } from '../types';
-import { useClubSearch } from '../hooks/useClubSearch';
+import { Experience, ExperienceCategory, CATEGORY_LABELS, CATEGORY_ICONS, MapBounds } from '../types';
+import { experiencesByCategory, getExperienceLogo, getExperienceInitials } from '../data/experiences';
+import { useExperienceSearch } from '../hooks/useClubSearch';
 import ClubSearchBar from '../components/clubs/ClubSearchBar';
-import ClubMap, { MapBounds } from '../components/clubs/ClubMap';
+import ClubMap from '../components/clubs/ClubMap';
 import ClubDetailModal from '../components/clubs/ClubDetailModal';
-import { getClubLogo, getClubInitials } from '../data/clubs';
+
+const CATEGORIES: ExperienceCategory[] = ['clubs', 'nature_parties', 'festivals', 'concerts'];
 
 const DEFAULT_CENTER = { lat: 32.0, lng: 34.85, zoom: 8 };
 
@@ -23,7 +24,7 @@ function useCardPressAnim() {
 }
 
 interface CardProps {
-  club: Club;
+  exp: Experience;
   index: number;
   total: number;
   isSelected: boolean;
@@ -31,9 +32,9 @@ interface CardProps {
   onPress: () => void;
 }
 
-function AnimatedClubCard({ club, index, total, isSelected, onLayout, onPress }: CardProps) {
+function AnimatedExperienceCard({ exp, index, total, isSelected, onLayout, onPress }: CardProps) {
   const { scale, onPressIn, onPressOut } = useCardPressAnim();
-  const logo = getClubLogo(club);
+  const logo = getExperienceLogo(exp);
   return (
     <Animated.View
       style={{ transform: [{ scale }] }}
@@ -50,28 +51,28 @@ function AnimatedClubCard({ club, index, total, isSelected, onLayout, onPress }:
           isSelected && styles.clubCardSelected,
         ]}
       >
-        {isSelected && <View style={[styles.selectedBar, { backgroundColor: club.color }]} />}
-        <View style={[styles.clubAvatar, { borderColor: club.color + '55' }]}>
+        {isSelected && <View style={[styles.selectedBar, { backgroundColor: exp.color }]} />}
+        <View style={[styles.clubAvatar, { borderColor: exp.color + '55' }]}>
           {logo ? (
             <Image source={logo} style={styles.clubAvatarImg} />
           ) : (
-            <View style={[styles.clubAvatarFallback, { backgroundColor: club.color + '22' }]}>
-              <Text style={[styles.clubAvatarInitials, { color: club.color }]}>
-                {getClubInitials(club)}
+            <View style={[styles.clubAvatarFallback, { backgroundColor: exp.color + '22' }]}>
+              <Text style={[styles.clubAvatarInitials, { color: exp.color }]}>
+                {getExperienceInitials(exp)}
               </Text>
             </View>
           )}
         </View>
         <View style={styles.clubInfo}>
-          <Text style={styles.clubName} numberOfLines={1}>{club.name}</Text>
-          <Text style={styles.clubCity} numberOfLines={1}>{club.city}</Text>
+          <Text style={styles.clubName} numberOfLines={1}>{exp.name}</Text>
+          <Text style={styles.clubCity} numberOfLines={1}>{exp.city}</Text>
         </View>
         <View style={styles.clubRight}>
           <View style={styles.clubRatingRow}>
-            <Text style={[styles.clubRatingStar, { color: club.color }]}>★</Text>
-            <Text style={styles.clubRatingValue}>{club.rating}</Text>
+            <Text style={[styles.clubRatingStar, { color: exp.color }]}>★</Text>
+            <Text style={styles.clubRatingValue}>{exp.rating}</Text>
           </View>
-          <Text style={styles.clubPrice} numberOfLines={1}>{club.entryPrice}</Text>
+          <Text style={styles.clubPrice} numberOfLines={1}>{exp.entryPrice}</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -81,37 +82,43 @@ function AnimatedClubCard({ club, index, total, isSelected, onLayout, onPress }:
 export default function MapScreen() {
   const router = useRouter();
   const searchInputRef = useRef<TextInput>(null);
-  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+  const [activeCategory, setActiveCategory] = useState<ExperienceCategory>('clubs');
+  const [selected, setSelected] = useState<Experience | null>(null);
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownAnim = useRef(new Animated.Value(0)).current;
-  const { query, setQuery, clear, filtered: searchFiltered } = useClubSearch(clubs);
+  const categoryData = useMemo(() => experiencesByCategory[activeCategory], [activeCategory]);
+  const { query, setQuery, clear, filtered: searchFiltered } = useExperienceSearch(categoryData);
   const bottomSheetRef = useRef<BottomSheet>(null);
   const sheetListRef = useRef<any>(null);
   const snapPoints = useMemo(() => ['12%', '45%', '88%'], []);
 
   const animationConfigs = useBottomSheetSpringConfigs({
-    mass: 0.6,
-    stiffness: 280,
-    damping: 28,
-    overshootClamping: false,
+    mass: 0.6, stiffness: 280, damping: 28, overshootClamping: false,
   });
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const cardRefs = useRef<Record<number, number>>({});
 
-  const visibleClubs = useMemo(() => {
-    if (!mapBounds) return clubs;
-    return clubs.filter(c =>
-      c.latitude  <= mapBounds.north &&
-      c.latitude  >= mapBounds.south &&
-      c.longitude <= mapBounds.east  &&
-      c.longitude >= mapBounds.west
+  const visibleExperiences = useMemo(() => {
+    if (!mapBounds) return categoryData;
+    return categoryData.filter(e =>
+      e.latitude  <= mapBounds.north &&
+      e.latitude  >= mapBounds.south &&
+      e.longitude <= mapBounds.east  &&
+      e.longitude >= mapBounds.west
     );
-  }, [mapBounds]);
+  }, [mapBounds, categoryData]);
 
   const handleBoundsChange = useCallback((bounds: MapBounds) => {
     setMapBounds(bounds);
   }, []);
+
+  const switchCategory = useCallback((cat: ExperienceCategory) => {
+    setActiveCategory(cat);
+    setSelected(null);
+    setMapCenter(DEFAULT_CENTER);
+    clear();
+  }, [clear]);
 
   useEffect(() => {
     const shouldShow = query.trim().length > 0;
@@ -124,45 +131,76 @@ export default function MapScreen() {
     }).start();
   }, [query]);
 
-  const focusClub = useCallback((club: Club) => {
-    setSelectedClub(club);
-    setMapCenter({ lat: club.latitude, lng: club.longitude, zoom: 15 });
+  const focusExperience = useCallback((exp: Experience) => {
+    setSelected(exp);
+    setMapCenter({ lat: exp.latitude, lng: exp.longitude, zoom: 15 });
     bottomSheetRef.current?.snapToIndex(1);
-    const yOffset = cardRefs.current[club.id];
+    const yOffset = cardRefs.current[exp.id];
     if (yOffset !== undefined && sheetListRef.current) {
       sheetListRef.current.scrollTo({ y: yOffset, animated: true });
     }
   }, []);
 
-  const handleSelectFromSearch = (club: Club) => {
+  const handleSelectFromSearch = (exp: Experience) => {
     Keyboard.dismiss();
     setShowDropdown(false);
     setQuery('');
-    router.push(`/club/${club.id}`);
+    router.push(`/club/${exp.id}`);
   };
 
-  const goToDetails = (club: Club) => {
-    setSelectedClub(null);
-    router.push(`/club/${club.id}`);
+  const goToDetails = (exp: Experience) => {
+    setSelected(null);
+    router.push(`/club/${exp.id}`);
   };
 
   const resetMap = () => {
-    setSelectedClub(null);
+    setSelected(null);
     setMapCenter(DEFAULT_CENTER);
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.title}>מועדונים בישראל</Text>
-          <Text style={styles.subtitle}>{clubs.length} מקומות בילוי</Text>
+          <Text style={styles.title}>Outly</Text>
+          <Text style={styles.subtitle}>גלה את הלילה</Text>
         </View>
         <TouchableOpacity style={styles.iconBtn} activeOpacity={0.7}>
           <Ionicons name="options-outline" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
+      {/* Category Selector */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryScroll}
+        contentContainerStyle={styles.categoryContent}
+      >
+        {CATEGORIES.map(cat => {
+          const isActive = cat === activeCategory;
+          return (
+            <TouchableOpacity
+              key={cat}
+              onPress={() => switchCategory(cat)}
+              activeOpacity={0.75}
+              style={[styles.categoryPill, isActive && styles.categoryPillActive]}
+            >
+              <Ionicons
+                name={CATEGORY_ICONS[cat] as any}
+                size={14}
+                color={isActive ? '#fff' : '#6b7280'}
+              />
+              <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
+                {CATEGORY_LABELS[cat]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Search */}
       <View style={styles.searchWrapper}>
         <ClubSearchBar
           value={query}
@@ -183,7 +221,7 @@ export default function MapScreen() {
             {searchFiltered.length === 0 ? (
               <View style={styles.dropdownEmpty}>
                 <Ionicons name="search-outline" size={22} color="#4b5563" />
-                <Text style={styles.dropdownEmptyText}>לא נמצאו מועדונים</Text>
+                <Text style={styles.dropdownEmptyText}>לא נמצאו תוצאות</Text>
               </View>
             ) : (
               <ScrollView
@@ -191,19 +229,19 @@ export default function MapScreen() {
                 showsVerticalScrollIndicator={false}
                 style={{ maxHeight: 260 }}
               >
-                {searchFiltered.map((club, index) => (
+                {searchFiltered.map((exp, index) => (
                   <TouchableOpacity
-                    key={club.id}
+                    key={exp.id}
                     style={[styles.dropdownRow, index < searchFiltered.length - 1 && styles.dropdownRowBorder]}
-                    onPress={() => handleSelectFromSearch(club)}
+                    onPress={() => handleSelectFromSearch(exp)}
                     activeOpacity={0.75}
                   >
-                    <View style={[styles.dropdownDot, { backgroundColor: club.color }]} />
+                    <View style={[styles.dropdownDot, { backgroundColor: exp.color }]} />
                     <View style={styles.dropdownRowInfo}>
-                      <Text style={styles.dropdownRowName} numberOfLines={1}>{club.name}</Text>
-                      <Text style={styles.dropdownRowCity}>{club.city}</Text>
+                      <Text style={styles.dropdownRowName} numberOfLines={1}>{exp.name}</Text>
+                      <Text style={styles.dropdownRowCity}>{exp.city}</Text>
                     </View>
-                    <Text style={[styles.dropdownRowRating, { color: club.color }]}>★ {club.rating}</Text>
+                    <Text style={[styles.dropdownRowRating, { color: exp.color }]}>★ {exp.rating}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -212,15 +250,17 @@ export default function MapScreen() {
         )}
       </View>
 
+      {/* Map */}
       <ClubMap
-        clubs={clubs}
+        experiences={categoryData}
         center={mapCenter}
-        selectedClubId={selectedClub?.id}
-        onSelectClub={focusClub}
+        selectedId={selected?.id}
+        onSelect={focusExperience}
         onRecenter={resetMap}
         onBoundsChange={handleBoundsChange}
       />
 
+      {/* Bottom Sheet */}
       <BottomSheet
         ref={bottomSheetRef}
         index={0}
@@ -236,7 +276,7 @@ export default function MapScreen() {
       >
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetTitle}>
-            {`מועדונים באזור זה (${visibleClubs.length})`}
+            {`${CATEGORY_LABELS[activeCategory]} באזור זה (${visibleExperiences.length})`}
           </Text>
         </View>
         <BottomSheetScrollView
@@ -244,27 +284,27 @@ export default function MapScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.sheetList}
         >
-          {visibleClubs.map((club, index) => (
-            <AnimatedClubCard
-              key={club.id}
-              club={club}
+          {visibleExperiences.map((exp, index) => (
+            <AnimatedExperienceCard
+              key={exp.id}
+              exp={exp}
               index={index}
-              total={visibleClubs.length}
-              isSelected={selectedClub?.id === club.id}
-              onLayout={(y: number) => { cardRefs.current[club.id] = y; }}
-              onPress={() => { focusClub(club); goToDetails(club); }}
+              total={visibleExperiences.length}
+              isSelected={selected?.id === exp.id}
+              onLayout={(y: number) => { cardRefs.current[exp.id] = y; }}
+              onPress={() => { focusExperience(exp); goToDetails(exp); }}
             />
           ))}
-          {visibleClubs.length === 0 && (
+          {visibleExperiences.length === 0 && (
             <View style={styles.emptyState}>
               <Ionicons name="map-outline" size={32} color="#2A2A3C" />
-              <Text style={styles.emptyText}>אין מועדונים באזור זה</Text>
+              <Text style={styles.emptyText}>אין תוצאות באזור זה</Text>
             </View>
           )}
         </BottomSheetScrollView>
       </BottomSheet>
 
-      <ClubDetailModal club={selectedClub} onClose={() => setSelectedClub(null)} onViewDetails={goToDetails} />
+      <ClubDetailModal club={selected} onClose={() => setSelected(null)} onViewDetails={goToDetails} />
     </SafeAreaView>
   );
 }
@@ -282,6 +322,18 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: '#2A2A3C',
   },
+  categoryScroll: { flexGrow: 0, marginBottom: 4 },
+  categoryContent: { paddingHorizontal: 16, gap: 8, paddingBottom: 6 },
+  categoryPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
+  },
+  categoryPillActive: {
+    backgroundColor: '#7B61FF', borderColor: '#7B61FF',
+  },
+  categoryLabel: { fontSize: 13, fontWeight: '600', color: '#6b7280' },
+  categoryLabelActive: { color: '#fff' },
   searchWrapper: { paddingHorizontal: 16, paddingBottom: 8, zIndex: 100 },
   dropdown: {
     position: 'absolute', top: 54, left: 0, right: 0,
