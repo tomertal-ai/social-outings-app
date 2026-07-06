@@ -218,20 +218,24 @@ export default function MapScreen() {
     return `${n} ${cat} באזור`;
   }, [visibleExperiences.length, activeCategory]);
 
+  const sheetMarginBottom = TAB_BAR_HEIGHT + bottomInset;
+
   return (
     <View style={styles.container}>
-      {/* ── Map fills full screen ── */}
-      <ClubMap
-        experiences={categoryData}
-        center={mapCenter}
-        selectedId={selected?.id}
-        onSelect={focusExperience}
-        onRecenter={resetMap}
-        onBoundsChange={handleBoundsChange}
-      />
+      {/* ── Map fills full screen absolutely ── */}
+      <View style={StyleSheet.absoluteFill}>
+        <ClubMap
+          experiences={categoryData}
+          center={mapCenter}
+          selectedId={selected?.id}
+          onSelect={focusExperience}
+          onRecenter={resetMap}
+          onBoundsChange={handleBoundsChange}
+        />
+      </View>
 
       {/* ── Floating overlay: header + categories + search ── */}
-      <View style={[styles.overlay, { paddingTop: topInset - 4 }]} pointerEvents="box-none">
+      <View style={[styles.overlay, { paddingTop: Math.max(topInset - 4, 8) }]} pointerEvents="box-none">
 
       {/* ── Floating header overlay ── */}
       <View style={styles.header} pointerEvents="box-none">
@@ -342,7 +346,7 @@ export default function MapScreen() {
         enableContentPanningGesture={!mapInteracting}
         keyboardBehavior="extend"
         android_keyboardInputMode="adjustResize"
-        bottomInset={TAB_BAR_HEIGHT + bottomInset}
+        style={{ marginBottom: sheetMarginBottom }}
       >
         {/* Sheet header */}
         <View style={styles.sheetHeader}>
