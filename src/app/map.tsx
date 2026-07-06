@@ -154,8 +154,7 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
             )}
             {!!exp.hours && (
               <View style={styles.richHoursPill}>
-                <Ionicons name="time-outline" size={10} color="#6b7280" />
-                <Text style={styles.richHoursText}>{exp.hours}</Text>
+                 <Text style={styles.richHoursText}>{exp.hours}</Text>
               </View>
             )}
           </View>
@@ -250,12 +249,15 @@ export default function MapScreen() {
     }).start();
   }, [query]);
 
+  const lastNavRef = useRef<{ id: number; ts: number } | null>(null);
   const focusExperience = useCallback((exp: Experience) => {
+    const now = Date.now();
+    if (lastNavRef.current?.id === exp.id && now - lastNavRef.current.ts < 800) return;
+    lastNavRef.current = { id: exp.id, ts: now };
     setSelected(exp);
     if (exp.latitude !== undefined && exp.longitude !== undefined) {
       setMapCenter({ lat: exp.latitude, lng: exp.longitude, zoom: 15 });
     }
-    // Navigate directly to detail screen
     router.push(`/club/${exp.id}`);
   }, [router]);
 

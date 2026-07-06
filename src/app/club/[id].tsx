@@ -408,10 +408,11 @@ export default function ClubDetailScreen() {
             </View>
             <ScrollView
               horizontal
+              nestedScrollEnabled
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.photosScrollContent}
             >
-              {club.photos.map((uri, i) => (
+              {club.photos.slice(0, 5).map((uri, i) => (
                 <TouchableOpacity
                   key={i}
                   activeOpacity={0.88}
@@ -423,13 +424,13 @@ export default function ClubDetailScreen() {
                     style={styles.photoThumbImg}
                     resizeMode="cover"
                   />
-                  {i === club.photos!.length - 1 && club.photos!.length >= 5 && (
+                  {i === 4 && club.photos!.length > 5 && (
                     <View style={styles.photoThumbMore}>
                       <Text style={styles.photoThumbMoreText}>+{club.photos!.length - 4}</Text>
                     </View>
                   )}
                 </TouchableOpacity>
-              )).slice(0, 5)}
+              ))}
             </ScrollView>
           </View>
         )}
@@ -591,12 +592,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20, marginBottom: 12,
   },
   photosSeeAll: { fontSize: 13, color: '#7B61FF', fontWeight: '700' },
-  photosScrollContent: { paddingHorizontal: 20, gap: 10 },
+  photosScrollContent: { paddingHorizontal: 20, gap: 10, alignItems: 'flex-start' },
   photoThumb: {
     width: 140, height: 100, borderRadius: 14, overflow: 'hidden',
-    backgroundColor: '#161622',
+    backgroundColor: '#161622', flexShrink: 0,
   },
-  photoThumbImg: { width: '100%', height: '100%' },
+  photoThumbImg: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   photoThumbMore: {
     position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.55)',
