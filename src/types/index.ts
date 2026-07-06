@@ -44,6 +44,7 @@ export interface Experience {
   initials: string;
   logo?: any;
   coverImageUri?: string;
+  photos?: string[];
   color: string;
 
   // Location

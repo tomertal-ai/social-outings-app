@@ -1,15 +1,132 @@
 import {
   View, Text, ScrollView, TouchableOpacity,
   Linking, StyleSheet, Platform, Animated, Image,
+  Modal, FlatList, Dimensions, StatusBar,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { allExperiences } from '../../data/experiences';
 import { CATEGORY_LABELS } from '../../types';
 import ClubAvatar from '../../components/clubs/ClubAvatar';
+
+const SCREEN_W = Dimensions.get('window').width;
+
+// ---------------------------------------------------------------------------
+// Full-screen photo gallery
+// ---------------------------------------------------------------------------
+function FullScreenGallery({
+  photos, startIndex, visible, onClose,
+}: { photos: string[]; startIndex: number; visible: boolean; onClose: () => void }) {
+  const [current, setCurrent] = useState(startIndex);
+  const flatRef = useRef<FlatList>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const onShow = useCallback(() => {
+    setCurrent(startIndex);
+    Animated.timing(fadeAnim, { toValue: 1, duration: 220, useNativeDriver: true }).start();
+    setTimeout(() => {
+      flatRef.current?.scrollToIndex({ index: startIndex, animated: false });
+    }, 50);
+  }, [startIndex, fadeAnim]);
+
+  const close = () => {
+    Animated.timing(fadeAnim, { toValue: 0, duration: 180, useNativeDriver: true }).start(onClose);
+  };
+
+  const onViewable = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) setCurrent(viewableItems[0].index ?? 0);
+  }).current;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="none"
+      onShow={onShow}
+      onRequestClose={close}
+    >
+      <StatusBar hidden />
+      <Animated.View style={[galleryStyles.backdrop, { opacity: fadeAnim }]}>
+        {/* Header */}
+        <View style={galleryStyles.header}>
+          <TouchableOpacity onPress={close} style={galleryStyles.closeBtn} activeOpacity={0.8}>
+            <Ionicons name="close" size={22} color="#fff" />
+          </TouchableOpacity>
+          <Text style={galleryStyles.counter}>{current + 1} / {photos.length}</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        {/* Photo list */}
+        <FlatList
+          ref={flatRef}
+          data={photos}
+          keyExtractor={(_, i) => String(i)}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={(_, index) => ({ length: SCREEN_W, offset: SCREEN_W * index, index })}
+          onViewableItemsChanged={onViewable}
+          viewabilityConfig={{ viewAreaCoveragePercentThreshold: 50 }}
+          renderItem={({ item }) => (
+            <View style={galleryStyles.photoWrap}>
+              <Image
+                source={{ uri: item }}
+                style={galleryStyles.photo}
+                resizeMode="contain"
+              />
+            </View>
+          )}
+        />
+
+        {/* Dot indicators */}
+        <View style={galleryStyles.dots}>
+          {photos.map((_, i) => (
+            <View
+              key={i}
+              style={[
+                galleryStyles.dot,
+                i === current && galleryStyles.dotActive,
+              ]}
+            />
+          ))}
+        </View>
+      </Animated.View>
+    </Modal>
+  );
+}
+
+const galleryStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1, backgroundColor: '#000',
+    justifyContent: 'space-between',
+  },
+  header: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 16, paddingTop: 54, paddingBottom: 12,
+  },
+  closeBtn: {
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  counter: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  photoWrap: { width: SCREEN_W, justifyContent: 'center', alignItems: 'center' },
+  photo: { width: SCREEN_W, height: SCREEN_W * 1.1 },
+  dots: {
+    flexDirection: 'row', justifyContent: 'center', gap: 6,
+    paddingBottom: 48, paddingTop: 16,
+  },
+  dot: {
+    width: 6, height: 6, borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  dotActive: { backgroundColor: '#fff', width: 18 },
+});
+
+// ---------------------------------------------------------------------------
 
 const LOCATION_STATUS_LABELS: Record<string, string> = {
   fixed: 'מיקום קבוע',
@@ -83,9 +200,16 @@ export default function ClubDetailScreen() {
   const club = allExperiences.find(c => String(c.id) === id);
   const [isSaved, setIsSaved] = useState(false);
   const [coverError, setCoverError] = useState(false);
+  const [galleryVisible, setGalleryVisible] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
   const heartScale = useRef(new Animated.Value(1)).current;
   const showCover = !!club?.coverImageUri && !coverError;
   const { top: topInset } = useSafeAreaInsets();
+
+  const openGallery = (index: number) => {
+    setGalleryIndex(index);
+    setGalleryVisible(true);
+  };
 
   if (!club) {
     return (
@@ -273,6 +397,43 @@ export default function ClubDetailScreen() {
           </View>
         )}
 
+        {/* Photos */}
+        {club.photos && club.photos.length > 0 && (
+          <View style={styles.photosSection}>
+            <View style={styles.photosSectionHeader}>
+              <Text style={styles.sectionTitle}>תמונות</Text>
+              <TouchableOpacity onPress={() => openGallery(0)} activeOpacity={0.7}>
+                <Text style={styles.photosSeeAll}>הצג הכול</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.photosScrollContent}
+            >
+              {club.photos.map((uri, i) => (
+                <TouchableOpacity
+                  key={i}
+                  activeOpacity={0.88}
+                  onPress={() => openGallery(i)}
+                  style={styles.photoThumb}
+                >
+                  <Image
+                    source={{ uri }}
+                    style={styles.photoThumbImg}
+                    resizeMode="cover"
+                  />
+                  {i === club.photos!.length - 1 && club.photos!.length >= 5 && (
+                    <View style={styles.photoThumbMore}>
+                      <Text style={styles.photoThumbMoreText}>+{club.photos!.length - 4}</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              )).slice(0, 5)}
+            </ScrollView>
+          </View>
+        )}
+
         {/* Bottom CTA */}
         <View style={styles.bottomCta}>
           {hasTicket ? (
@@ -286,6 +447,17 @@ export default function ClubDetailScreen() {
         </View>
 
       </ScrollView>
+
+      {/* Full-screen gallery */}
+      {club.photos && club.photos.length > 0 && (
+        <FullScreenGallery
+          photos={club.photos}
+          startIndex={galleryIndex}
+          visible={galleryVisible}
+          onClose={() => setGalleryVisible(false)}
+        />
+      )}
+
     </SafeAreaView>
   );
 }
@@ -411,4 +583,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
   },
   ticketBtnDisabledText: { fontSize: 17, fontWeight: '700', color: '#4b5563' },
+
+  // Photos section
+  photosSection: { marginBottom: 24 },
+  photosSectionHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, marginBottom: 12,
+  },
+  photosSeeAll: { fontSize: 13, color: '#7B61FF', fontWeight: '700' },
+  photosScrollContent: { paddingHorizontal: 20, gap: 10 },
+  photoThumb: {
+    width: 140, height: 100, borderRadius: 14, overflow: 'hidden',
+    backgroundColor: '#161622',
+  },
+  photoThumbImg: { width: '100%', height: '100%' },
+  photoThumbMore: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  photoThumbMoreText: { fontSize: 22, fontWeight: '800', color: '#fff' },
 });
