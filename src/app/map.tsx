@@ -1,9 +1,12 @@
-import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated, Keyboard, StyleSheet, Dimensions, Image, Platform } from 'react-native';
+import {
+  View, Text, TextInput, ScrollView, TouchableOpacity,
+  Animated, Keyboard, StyleSheet, Image, Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import BottomSheet, { BottomSheetScrollView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useBottomSheetSpringConfigs } from '@gorhom/bottom-sheet';
 import { Experience, ExperienceCategory, CATEGORY_LABELS, CATEGORY_ICONS, MapBounds } from '../types';
 import { experiencesByCategory, getExperienceLogo, getExperienceInitials } from '../data/experiences';
@@ -13,8 +16,12 @@ import ClubMap from '../components/clubs/ClubMap';
 import ClubDetailModal from '../components/clubs/ClubDetailModal';
 
 const CATEGORIES: ExperienceCategory[] = ['clubs', 'nature_parties', 'festivals', 'concerts'];
-
 const DEFAULT_CENTER = { lat: 32.0, lng: 34.85, zoom: 8 };
+
+// Snap points: collapsed (peek), mid, full
+const SNAP_PEEK  = '11%';
+const SNAP_MID   = '42%';
+const SNAP_FULL  = '86%';
 
 function useCardPressAnim() {
   const scale = useRef(new Animated.Value(1)).current;
@@ -23,6 +30,9 @@ function useCardPressAnim() {
   return { scale, onPressIn, onPressOut };
 }
 
+// ---------------------------------------------------------------------------
+// Compact card — ~20% smaller, clean
+// ---------------------------------------------------------------------------
 interface CardProps {
   exp: Experience;
   index: number;
@@ -32,7 +42,7 @@ interface CardProps {
   onPress: () => void;
 }
 
-function AnimatedExperienceCard({ exp, index, total, isSelected, onLayout, onPress }: CardProps) {
+function CompactCard({ exp, index, total, isSelected, onLayout, onPress }: CardProps) {
   const { scale, onPressIn, onPressOut } = useCardPressAnim();
   const logo = getExperienceLogo(exp);
   return (
@@ -46,67 +56,85 @@ function AnimatedExperienceCard({ exp, index, total, isSelected, onLayout, onPre
         onPressOut={onPressOut}
         onPress={onPress}
         style={[
-          styles.clubCard,
-          index < total - 1 && styles.clubCardBorder,
-          isSelected && styles.clubCardSelected,
+          styles.card,
+          index < total - 1 && styles.cardBorder,
+          isSelected && styles.cardSelected,
         ]}
       >
         {isSelected && <View style={[styles.selectedBar, { backgroundColor: exp.color }]} />}
-        <View style={[styles.clubAvatar, { borderColor: exp.color + '55' }]}>
+
+        {/* Avatar */}
+        <View style={[styles.avatar, { borderColor: exp.color + '50' }]}>
           {logo ? (
-            <Image source={logo} style={styles.clubAvatarImg} />
+            <Image source={logo} style={styles.avatarImg} />
           ) : (
-            <View style={[styles.clubAvatarFallback, { backgroundColor: exp.color + '22' }]}>
-              <Text style={[styles.clubAvatarInitials, { color: exp.color }]}>
+            <View style={[styles.avatarFallback, { backgroundColor: exp.color + '20' }]}>
+              <Text style={[styles.avatarInitials, { color: exp.color }]}>
                 {getExperienceInitials(exp)}
               </Text>
             </View>
           )}
         </View>
-        <View style={styles.clubInfo}>
-          <Text style={styles.clubName} numberOfLines={1}>{exp.name}</Text>
-          <Text style={styles.clubCity} numberOfLines={1}>{exp.city}</Text>
-          {exp.locationStatus && exp.locationStatus !== 'fixed' && (
-            <View style={styles.approxBadge}>
-              <Ionicons name="warning-outline" size={10} color="#f59e0b" />
-              <Text style={styles.approxBadgeText}>
-                {exp.approximateArea?.regionName ? `מיקום משוער · ${exp.approximateArea.regionName}` : 'מיקום משוער'}
-              </Text>
-            </View>
-          )}
+
+        {/* Info */}
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardName} numberOfLines={1}>{exp.name}</Text>
+          <View style={styles.cardMeta}>
+            <Ionicons
+              name={exp.locationStatus && exp.locationStatus !== 'fixed' ? 'location-outline' : 'location-sharp'}
+              size={10}
+              color={exp.locationStatus && exp.locationStatus !== 'fixed' ? '#f59e0b' : '#6b7280'}
+            />
+            <Text style={[
+              styles.cardCity,
+              exp.locationStatus && exp.locationStatus !== 'fixed' && styles.cardCityApprox,
+            ]} numberOfLines={1}>
+              {exp.approximateArea?.regionName ?? exp.city}
+              {exp.locationStatus && exp.locationStatus !== 'fixed' ? ' ·̃' : ''}
+            </Text>
+          </View>
         </View>
-        <View style={styles.clubRight}>
+
+        {/* Right */}
+        <View style={styles.cardRight}>
           {exp.rating !== undefined && (
-            <View style={styles.clubRatingRow}>
-              <Text style={[styles.clubRatingStar, { color: exp.color }]}>★</Text>
-              <Text style={styles.clubRatingValue}>{exp.rating}</Text>
+            <View style={styles.ratingRow}>
+              <Text style={[styles.ratingStar, { color: exp.color }]}>★</Text>
+              <Text style={styles.ratingVal}>{exp.rating}</Text>
             </View>
           )}
-          {!!exp.entryPrice && <Text style={styles.clubPrice} numberOfLines={1}>{exp.entryPrice}</Text>}
+          {!!exp.entryPrice && (
+            <Text style={styles.price} numberOfLines={1}>{exp.entryPrice}</Text>
+          )}
         </View>
       </TouchableOpacity>
     </Animated.View>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Main screen
+// ---------------------------------------------------------------------------
 export default function MapScreen() {
   const router = useRouter();
   const searchInputRef = useRef<TextInput>(null);
   const [activeCategory, setActiveCategory] = useState<ExperienceCategory>('clubs');
-  const [selected, setSelected] = useState<Experience | null>(null);
+  const [selected, setSelected]   = useState<Experience | null>(null);
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownAnim = useRef(new Animated.Value(0)).current;
   const categoryData = useMemo(() => experiencesByCategory[activeCategory], [activeCategory]);
   const { query, setQuery, clear, filtered: searchFiltered } = useExperienceSearch(categoryData);
+
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const sheetListRef = useRef<any>(null);
-  const snapPoints = useMemo(() => ['12%', '45%', '88%'], []);
+  const sheetListRef   = useRef<any>(null);
+  const snapPoints     = useMemo(() => [SNAP_PEEK, SNAP_MID, SNAP_FULL], []);
 
   const animationConfigs = useBottomSheetSpringConfigs({
-    mass: 0.6, stiffness: 280, damping: 28, overshootClamping: false,
+    mass: 0.5, stiffness: 320, damping: 32, overshootClamping: false,
   });
-  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+
+  const [mapBounds, setMapBounds]         = useState<MapBounds | null>(null);
   const [mapInteracting, setMapInteracting] = useState(false);
   const mapInteractTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cardRefs = useRef<Record<number, number>>({});
@@ -124,7 +152,6 @@ export default function MapScreen() {
 
   const handleBoundsChange = useCallback((bounds: MapBounds) => {
     setMapBounds(bounds);
-    // Mark map as interacting to prevent sheet from opening during zoom/pan
     setMapInteracting(true);
     if (mapInteractTimeoutRef.current) clearTimeout(mapInteractTimeoutRef.current);
     mapInteractTimeoutRef.current = setTimeout(() => setMapInteracting(false), 600);
@@ -135,6 +162,7 @@ export default function MapScreen() {
     setSelected(null);
     setMapCenter(DEFAULT_CENTER);
     clear();
+    bottomSheetRef.current?.snapToIndex(0);
   }, [clear]);
 
   useEffect(() => {
@@ -142,9 +170,7 @@ export default function MapScreen() {
     setShowDropdown(shouldShow);
     Animated.spring(dropdownAnim, {
       toValue: shouldShow ? 1 : 0,
-      useNativeDriver: true,
-      tension: 120,
-      friction: 14,
+      useNativeDriver: true, tension: 120, friction: 14,
     }).start();
   }, [query]);
 
@@ -153,11 +179,15 @@ export default function MapScreen() {
     if (exp.latitude !== undefined && exp.longitude !== undefined) {
       setMapCenter({ lat: exp.latitude, lng: exp.longitude, zoom: 15 });
     }
+    // Expand sheet to mid if currently peeking
     bottomSheetRef.current?.snapToIndex(1);
-    const yOffset = cardRefs.current[exp.id];
-    if (yOffset !== undefined && sheetListRef.current) {
-      sheetListRef.current.scrollTo({ y: yOffset, animated: true });
-    }
+    // Scroll list to card
+    setTimeout(() => {
+      const yOffset = cardRefs.current[exp.id];
+      if (yOffset !== undefined && sheetListRef.current) {
+        sheetListRef.current.scrollTo({ y: yOffset, animated: true });
+      }
+    }, 320);
   }, []);
 
   const handleSelectFromSearch = (exp: Experience) => {
@@ -177,11 +207,19 @@ export default function MapScreen() {
     setMapCenter(DEFAULT_CENTER);
   };
 
+  // Header label: "18 מועדונים קרובים"
+  const countLabel = useMemo(() => {
+    const n = visibleExperiences.length;
+    const cat = CATEGORY_LABELS[activeCategory];
+    return `${n} ${cat} באזור`;
+  }, [visibleExperiences.length, activeCategory]);
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
+
+      {/* ── Floating header overlay ── */}
+      <View style={styles.header} pointerEvents="box-none">
+        <View style={styles.headerLeft}>
           <Text style={styles.title}>Outly</Text>
           <Text style={styles.subtitle}>גלה את הלילה</Text>
         </View>
@@ -190,7 +228,7 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Category Selector */}
+      {/* ── Category pills ── */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -208,7 +246,7 @@ export default function MapScreen() {
             >
               <Ionicons
                 name={CATEGORY_ICONS[cat] as any}
-                size={14}
+                size={13}
                 color={isActive ? '#fff' : '#6b7280'}
               />
               <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
@@ -219,7 +257,7 @@ export default function MapScreen() {
         })}
       </ScrollView>
 
-      {/* Search */}
+      {/* ── Search bar ── */}
       <View style={styles.searchWrapper}>
         <ClubSearchBar
           value={query}
@@ -260,7 +298,9 @@ export default function MapScreen() {
                       <Text style={styles.dropdownRowName} numberOfLines={1}>{exp.name}</Text>
                       <Text style={styles.dropdownRowCity}>{exp.city}</Text>
                     </View>
-                    <Text style={[styles.dropdownRowRating, { color: exp.color }]}>★ {exp.rating}</Text>
+                    {exp.rating !== undefined && (
+                      <Text style={[styles.dropdownRowRating, { color: exp.color }]}>★ {exp.rating}</Text>
+                    )}
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -269,7 +309,7 @@ export default function MapScreen() {
         )}
       </View>
 
-      {/* Map */}
+      {/* ── Map (fills everything) ── */}
       <ClubMap
         experiences={categoryData}
         center={mapCenter}
@@ -279,7 +319,7 @@ export default function MapScreen() {
         onBoundsChange={handleBoundsChange}
       />
 
-      {/* Bottom Sheet */}
+      {/* ── Bottom Sheet ── */}
       <BottomSheet
         ref={bottomSheetRef}
         index={0}
@@ -288,25 +328,30 @@ export default function MapScreen() {
         backgroundStyle={styles.sheetBg}
         handleIndicatorStyle={styles.sheetHandle}
         handleStyle={styles.sheetHandleArea as any}
-        enableOverDrag={true}
+        enableOverDrag={false}
         enablePanDownToClose={false}
         enableHandlePanningGesture={!mapInteracting}
         enableContentPanningGesture={!mapInteracting}
         keyboardBehavior="extend"
         android_keyboardInputMode="adjustResize"
       >
+        {/* Sheet header */}
         <View style={styles.sheetHeader}>
-          <Text style={styles.sheetTitle}>
-            {`${CATEGORY_LABELS[activeCategory]} באזור זה (${visibleExperiences.length})`}
-          </Text>
+          <Text style={styles.sheetTitle}>{countLabel}</Text>
+          {selected && (
+            <TouchableOpacity onPress={() => setSelected(null)} style={styles.sheetClearBtn} activeOpacity={0.7}>
+              <Text style={styles.sheetClearText}>נקה</Text>
+            </TouchableOpacity>
+          )}
         </View>
+
         <BottomSheetScrollView
           ref={sheetListRef}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.sheetList}
         >
           {visibleExperiences.map((exp, index) => (
-            <AnimatedExperienceCard
+            <CompactCard
               key={exp.id}
               exp={exp}
               index={index}
@@ -318,7 +363,7 @@ export default function MapScreen() {
           ))}
           {visibleExperiences.length === 0 && (
             <View style={styles.emptyState}>
-              <Ionicons name="map-outline" size={32} color="#2A2A3C" />
+              <Ionicons name="map-outline" size={28} color="#2A2A3C" />
               <Text style={styles.emptyText}>אין תוצאות באזור זה</Text>
             </View>
           )}
@@ -330,144 +375,112 @@ export default function MapScreen() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0B0B14' },
+
+  // Header
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10,
   },
-  title: { fontSize: 24, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
-  subtitle: { fontSize: 13, color: '#9ca3af', marginTop: 3 },
+  headerLeft: {},
+  title:    { fontSize: 24, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
+  subtitle: { fontSize: 12, color: '#6b7280', marginTop: 2 },
   iconBtn: {
-    width: 40, height: 40, borderRadius: 12, backgroundColor: '#161622',
+    width: 38, height: 38, borderRadius: 12, backgroundColor: '#161622',
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: '#2A2A3C',
   },
-  categoryScroll: { flexGrow: 0, marginBottom: 4 },
-  categoryContent: { paddingHorizontal: 16, gap: 8, paddingBottom: 6 },
+
+  // Categories
+  categoryScroll:  { flexGrow: 0, marginBottom: 4 },
+  categoryContent: { paddingHorizontal: 16, gap: 7, paddingBottom: 6 },
   categoryPill: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20,
     backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
   },
-  categoryPillActive: {
-    backgroundColor: '#7B61FF', borderColor: '#7B61FF',
-  },
-  categoryLabel: { fontSize: 13, fontWeight: '600', color: '#6b7280' },
+  categoryPillActive: { backgroundColor: '#7B61FF', borderColor: '#7B61FF' },
+  categoryLabel:       { fontSize: 12, fontWeight: '600', color: '#6b7280' },
   categoryLabelActive: { color: '#fff' },
+
+  // Search
   searchWrapper: { paddingHorizontal: 16, paddingBottom: 8, zIndex: 100 },
   dropdown: {
     position: 'absolute', top: 54, left: 0, right: 0,
     backgroundColor: '#161622', borderRadius: 16,
-    borderWidth: 1.5, borderColor: '#2A2A3C',
-    overflow: 'hidden',
-    shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 20,
-    elevation: 20, zIndex: 200,
+    borderWidth: 1.5, borderColor: '#2A2A3C', overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5, shadowRadius: 20, elevation: 20, zIndex: 200,
   },
-  dropdownRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 13, gap: 12 },
+  dropdownRow:       { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
   dropdownRowBorder: { borderBottomWidth: 1, borderBottomColor: '#1f1f30' },
-  dropdownDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
-  dropdownRowInfo: { flex: 1 },
-  dropdownRowName: { fontSize: 14, fontWeight: '700', color: '#fff' },
-  dropdownRowCity: { fontSize: 12, color: '#6b7280', marginTop: 2 },
+  dropdownDot:       { width: 9, height: 9, borderRadius: 5, flexShrink: 0 },
+  dropdownRowInfo:   { flex: 1 },
+  dropdownRowName:   { fontSize: 14, fontWeight: '700', color: '#fff' },
+  dropdownRowCity:   { fontSize: 12, color: '#6b7280', marginTop: 2 },
   dropdownRowRating: { fontSize: 12, fontWeight: '700', flexShrink: 0 },
-  dropdownEmpty: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 24 },
+  dropdownEmpty:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 24 },
   dropdownEmptyText: { fontSize: 14, color: '#4b5563', fontWeight: '600' },
-  sheetBg: {
-    backgroundColor: '#161622',
-    borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -8 },
-    shadowOpacity: 0.55,
-    shadowRadius: 24,
-    elevation: 24,
-  },
-  sheetHandleArea: {
-    paddingTop: 10, paddingBottom: 4,
-  },
-  sheetHandle: {
-    backgroundColor: '#3A3A4C', width: 40, height: 5, borderRadius: 3,
-  },
-  sheetHeader: {
-    paddingHorizontal: 20, paddingTop: 6, paddingBottom: 10,
-    borderBottomWidth: 1, borderBottomColor: '#1f1f30',
-  },
-  sheetTitle: {
-    fontSize: 15, fontWeight: '700', color: '#fff', letterSpacing: -0.2,
-  },
-  sheetList: {
-    paddingBottom: 40,
-  },
 
-  clubCard: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingHorizontal: 18, paddingVertical: 13,
+  // Bottom Sheet
+  sheetBg: {
+    backgroundColor: '#13131f',
+    borderTopLeftRadius: 22, borderTopRightRadius: 22,
+    shadowColor: '#000', shadowOffset: { width: 0, height: -6 },
+    shadowOpacity: 0.5, shadowRadius: 20, elevation: 20,
+  },
+  sheetHandleArea: { paddingTop: 10, paddingBottom: 2 },
+  sheetHandle:     { backgroundColor: '#2A2A3C', width: 36, height: 4, borderRadius: 2 },
+  sheetHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 18, paddingTop: 4, paddingBottom: 8,
+  },
+  sheetTitle:     { fontSize: 13, fontWeight: '700', color: '#9ca3af', letterSpacing: 0.1 },
+  sheetClearBtn:  { paddingHorizontal: 10, paddingVertical: 4 },
+  sheetClearText: { fontSize: 12, color: '#7B61FF', fontWeight: '600' },
+  sheetList:      { paddingBottom: 40 },
+
+  // Compact card
+  card: {
+    flexDirection: 'row', alignItems: 'center', gap: 11,
+    paddingHorizontal: 16, paddingVertical: 10,
     position: 'relative', overflow: 'hidden',
   },
-  clubCardBorder: {
-    borderBottomWidth: 1, borderBottomColor: '#1f1f30',
-  },
-  clubCardSelected: {
-    backgroundColor: '#1e1e30',
-  },
+  cardBorder:   { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#1f1f2e' },
+  cardSelected: { backgroundColor: '#1a1a2e' },
   selectedBar: {
-    position: 'absolute', left: 0, top: 10, bottom: 10,
+    position: 'absolute', left: 0, top: 8, bottom: 8,
     width: 3, borderRadius: 2,
   },
 
-  clubAvatar: {
-    width: 42, height: 42, borderRadius: 13,
+  // Avatar — 36px (was 42)
+  avatar: {
+    width: 36, height: 36, borderRadius: 11,
     borderWidth: 1.5, overflow: 'hidden', flexShrink: 0,
   },
-  clubAvatarImg: {
-    width: '100%', height: '100%',
-  },
-  clubAvatarFallback: {
-    flex: 1, alignItems: 'center', justifyContent: 'center',
-  },
-  clubAvatarInitials: {
-    fontSize: 14, fontWeight: '800',
-  },
+  avatarImg:      { width: '100%', height: '100%' },
+  avatarFallback: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  avatarInitials: { fontSize: 12, fontWeight: '800' },
 
-  clubInfo: {
-    flex: 1, gap: 2,
-  },
-  clubName: {
-    fontSize: 14, fontWeight: '700', color: '#fff', letterSpacing: -0.2,
-  },
-  clubCity: {
-    fontSize: 12, color: '#6b7280', fontWeight: '500',
-  },
-  approxBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 3,
-    marginTop: 3, alignSelf: 'flex-start',
-    backgroundColor: '#f59e0b18', borderRadius: 6,
-    paddingHorizontal: 6, paddingVertical: 2,
-    borderWidth: 1, borderColor: '#f59e0b40',
-  },
-  approxBadgeText: { fontSize: 10, color: '#f59e0b', fontWeight: '700' },
+  // Card text
+  cardInfo:      { flex: 1, gap: 2 },
+  cardName:      { fontSize: 13, fontWeight: '700', color: '#f3f4f6', letterSpacing: -0.1 },
+  cardMeta:      { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  cardCity:      { fontSize: 11, color: '#6b7280', fontWeight: '500' },
+  cardCityApprox:{ color: '#f59e0b' },
 
-  clubRight: {
-    alignItems: 'flex-end', gap: 3,
-  },
-  clubRatingRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 3,
-  },
-  clubRatingStar: {
-    fontSize: 11,
-  },
-  clubRatingValue: {
-    fontSize: 12, fontWeight: '700', color: '#fff',
-  },
-  clubPrice: {
-    fontSize: 11, color: '#6b7280', fontWeight: '600',
-  },
+  // Card right
+  cardRight:  { alignItems: 'flex-end', gap: 2 },
+  ratingRow:  { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  ratingStar: { fontSize: 10 },
+  ratingVal:  { fontSize: 11, fontWeight: '700', color: '#f3f4f6' },
+  price:      { fontSize: 10, color: '#6b7280', fontWeight: '500' },
 
-  emptyState: {
-    alignItems: 'center', justifyContent: 'center',
-    paddingTop: 48, gap: 10,
-  },
-  emptyText: {
-    fontSize: 14, color: '#374151', fontWeight: '600',
-  },
+  // Empty
+  emptyState: { alignItems: 'center', justifyContent: 'center', paddingTop: 40, gap: 10 },
+  emptyText:  { fontSize: 13, color: '#374151', fontWeight: '600' },
 });
