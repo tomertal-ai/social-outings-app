@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { useRouter } from 'expo-router';
+import MaskedView from '@react-native-masked-view/masked-view';
+import { LinearGradient } from 'expo-linear-gradient';
 import Logo from '../components/Logo';
 
 export default function SplashScreen() {
@@ -92,7 +94,14 @@ export default function SplashScreen() {
           alignItems: 'center',
         }}
       >
-        <Text style={styles.appName}>Outly</Text>
+        <MaskedView maskElement={<Text style={styles.appName}>Outly</Text>}>
+          <LinearGradient
+            colors={['#2CB7FF', '#7B61FF', '#C850C0']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.gradientText}
+          />
+        </MaskedView>
         <Text style={styles.tagline}>Discover where to go tonight</Text>
       </Animated.View>
     </View>
@@ -114,8 +123,13 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 34,
     fontWeight: '800',
-    color: '#fff',
+    color: '#000',
     letterSpacing: -0.8,
+    marginBottom: 6,
+  },
+  gradientText: {
+    height: 46,
+    width: 140,
     marginBottom: 6,
   },
   tagline: {
