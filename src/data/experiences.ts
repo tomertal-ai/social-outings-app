@@ -6,6 +6,7 @@ import { Experience, ExperienceCategory } from '../types';
 const clubsData: Experience[] = [
   {
     id: 1, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://www.nightflow.com/wp-content/uploads/2021/06/theblocktelaviv.jpg',
     name: 'The Block', initials: 'TB', color: '#7c3aed',
     city: 'Tel Aviv', address: '157 HaAluf David St, Tel Aviv',
     latitude: 32.0538, longitude: 34.7620, locationStatus: 'fixed',
@@ -20,6 +21,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 2, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.ra.co/7ef9d23d1a44a3ffb2b6d97b0fdbf07ac4df55f4/400x400x1/bg/db/db49dbc8.jpg',
     name: 'Kuli Alma', initials: 'KA', color: '#ec4899',
     city: 'Tel Aviv', address: '10 Mikve Israel St, Tel Aviv',
     latitude: 32.0605, longitude: 34.7725, locationStatus: 'fixed',
@@ -34,6 +36,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 3, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.ra.co/0a5b09eba1f3ebfca3e2cbe72e9fd2419e1f62f8/400x400x1/bg/3d/3db0a8de.jpg',
     name: 'Shalvata', initials: 'SH', color: '#06b6d4',
     city: 'Tel Aviv', address: 'Tel Aviv Port (Namal), Tel Aviv',
     latitude: 32.0958, longitude: 34.7738, locationStatus: 'fixed',
@@ -48,6 +51,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 4, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://www.nightflow.com/wp-content/uploads/2021/06/haoman-17.jpg',
     name: 'Haoman 17', initials: 'H1', color: '#dc2626',
     city: 'Jerusalem', address: '17 HaOman St, Talpiot, Jerusalem',
     latitude: 31.7515, longitude: 35.2120, locationStatus: 'fixed',
@@ -62,6 +66,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 5, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.ra.co/e5c2b2a34e7ef3e2d9a14b8c62f5c4a3e8f1d0c2/400x400x1/bg/3d/gagarin.jpg',
     name: 'Gagarin Club', initials: 'GC', color: '#64748b',
     city: 'Tel Aviv', address: '13 Kibbutz Galuyot Rd, Tel Aviv',
     latitude: 32.0520, longitude: 34.7650, locationStatus: 'fixed',
@@ -75,6 +80,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 6, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://en.atlantatlv.com/wp-content/uploads/2022/01/Atlanta-TLV-outdoor.jpg',
     name: 'Atlanta TLV', initials: 'AT', color: '#0ea5e9',
     city: 'Tel Aviv', address: '30 Ibn Gavirol St, Tel Aviv',
     latitude: 32.0853, longitude: 34.7818, locationStatus: 'fixed',
@@ -88,6 +94,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 7, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.ra.co/cappella-tlv-rooftop.jpg',
     name: 'The Cappella', initials: 'CP', color: '#d97706',
     city: 'Tel Aviv', address: "28 HaArba'a St, Tel Aviv",
     latitude: 32.0697, longitude: 34.7897, locationStatus: 'fixed',
@@ -129,6 +136,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 10, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://duplexclub.co.il/wp-content/uploads/duplex-club-exterior.jpg',
     name: 'Duplex Club', initials: 'DC', color: '#f97316',
     city: 'Tel Aviv', address: 'Florentin, Tel Aviv',
     latitude: 32.0565, longitude: 34.7720, locationStatus: 'fixed',
@@ -155,6 +163,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 12, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.ra.co/factory-haifa-main.jpg',
     name: 'Factory Haifa', initials: 'FC', color: '#6366f1',
     city: 'Haifa', address: '110 HaLutzei HaTaasiya St, Haifa',
     latitude: 32.8070, longitude: 34.9650, locationStatus: 'fixed',
@@ -168,6 +177,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 13, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://selena.co.il/wp-content/uploads/selena-eilat-main.jpg',
     name: 'Selena Eilat', initials: 'SL', color: '#f59e0b',
     city: 'Eilat', address: '8 Carmel St, Eilat',
     latitude: 29.5585, longitude: 34.9480, locationStatus: 'fixed',
@@ -182,6 +192,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 14, category: 'clubs', verificationStatus: 'verified',
+    coverImageUri: 'https://images.ra.co/jimmy-who-tlv.jpg',
     name: 'Jimmy Who', initials: 'JW', color: '#f43f5e',
     city: 'Tel Aviv', address: '24 Rothschild Blvd, Tel Aviv',
     latitude: 32.0632, longitude: 34.7708, locationStatus: 'fixed',

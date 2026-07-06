@@ -70,10 +70,24 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
       >
         {/* ── Cover ── */}
         <View style={[styles.richCover, { backgroundColor: exp.color + '20' }]}>
-          {/* Background blobs */}
-          <View style={[styles.richCoverAccent,  { backgroundColor: exp.color + '35' }]} />
-          <View style={[styles.richCoverAccent2, { backgroundColor: exp.color + '18' }]} />
-          <View style={[styles.richCoverAccent3, { backgroundColor: exp.color + '12' }]} />
+          {/* Background: real cover image OR gradient blobs */}
+          {exp.coverImageUri ? (
+            <>
+              <Image
+                source={{ uri: exp.coverImageUri }}
+                style={styles.richCoverBg}
+                resizeMode="cover"
+              />
+              {/* Dark overlay so logo + badges remain readable */}
+              <View style={styles.richCoverOverlay} />
+            </>
+          ) : (
+            <>
+              <View style={[styles.richCoverAccent,  { backgroundColor: exp.color + '35' }]} />
+              <View style={[styles.richCoverAccent2, { backgroundColor: exp.color + '18' }]} />
+              <View style={[styles.richCoverAccent3, { backgroundColor: exp.color + '12' }]} />
+            </>
+          )}
 
           {/* Logo centered — large, prominent */}
           <View style={[styles.richCoverAvatar, { borderColor: exp.color + '70', backgroundColor: exp.color + '30' }]}>
@@ -558,6 +572,8 @@ const styles = StyleSheet.create({
     borderWidth: 2, alignItems: 'center', justifyContent: 'center',
     overflow: 'hidden',
   },
+  richCoverBg:          { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  richCoverOverlay:     { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.52)' },
   richCoverAvatarImg:   { width: '100%', height: '100%' },
   richCoverInitials:    { fontSize: 20, fontWeight: '800' },
   richStatusBadge: {

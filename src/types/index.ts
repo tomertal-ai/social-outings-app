@@ -43,6 +43,7 @@ export interface Experience {
   name: string;
   initials: string;
   logo?: any;
+  coverImageUri?: string;
   color: string;
 
   // Location
