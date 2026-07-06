@@ -131,7 +131,7 @@ function buildMapHtml(
   .marker-approx-dot { font-size:10px; padding-right:6px; flex-shrink:0; opacity:0.85; }
   .leaflet-control-attribution { font-size:8px; opacity:0.3; color:#9ca3af; }
   .leaflet-control-attribution a { color:#9ca3af; }
-  .leaflet-control-zoom { border:none !important; box-shadow:0 4px 16px rgba(0,0,0,0.4) !important; border-radius:12px !important; overflow:hidden; }
+  .leaflet-control-zoom { border:none !important; box-shadow:0 4px 16px rgba(0,0,0,0.4) !important; border-radius:12px !important; overflow:hidden; margin-bottom:64px !important; margin-right:16px !important; }
   .leaflet-control-zoom a { color:#fff !important; background:rgba(16,16,28,0.9) !important; font-weight:bold !important; border-color:rgba(255,255,255,0.08) !important; }
   .leaflet-control-zoom a:hover { background:rgba(42,42,60,0.9) !important; }
 </style>
@@ -139,7 +139,8 @@ function buildMapHtml(
 <body>
 <div id="map"></div>
 <script>
-  var map = L.map('map').setView([${centerLat}, ${centerLng}], ${zoom});
+  var map = L.map('map', { zoomControl: false }).setView([${centerLat}, ${centerLng}], ${zoom});
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
     attribution: '© Esri', maxZoom: 18
   }).addTo(map);
