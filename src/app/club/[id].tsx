@@ -8,7 +8,22 @@ import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { allExperiences } from '../../data/experiences';
+import { CATEGORY_LABELS } from '../../types';
 import ClubAvatar from '../../components/clubs/ClubAvatar';
+
+const LOCATION_STATUS_LABELS: Record<string, string> = {
+  fixed: 'מיקום קבוע',
+  announced: 'מיקום מוכרז לפני האירוע',
+  secret: 'מיקום סודי',
+  tba: 'מיקום TBA',
+};
+
+const LOCATION_STATUS_ICONS: Record<string, string> = {
+  fixed: 'location-sharp',
+  announced: 'megaphone-outline',
+  secret: 'eye-off-outline',
+  tba: 'help-circle-outline',
+};
 
 function InfoBox({ icon, label, value, color }: { icon: string; label: string; value: string; color: string }) {
   return (
@@ -74,7 +89,7 @@ export default function ClubDetailScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.notFound}>
           <Ionicons name="alert-circle-outline" size={48} color="#4b5563" />
-          <Text style={styles.notFoundText}>מועדון לא נמצא</Text>
+          <Text style={styles.notFoundText}>לא נמצא</Text>
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Text style={styles.backBtnText}>חזור</Text>
           </TouchableOpacity>
@@ -124,24 +139,35 @@ export default function ClubDetailScreen() {
         <View style={styles.hero}>
           <ClubAvatar club={club} size={80} />
           <View style={styles.heroText}>
+            {/* Category badge */}
+            <View style={[styles.categoryBadge, { backgroundColor: club.color + '22', borderColor: club.color + '55' }]}>
+              <Text style={[styles.categoryBadgeText, { color: club.color }]}>{CATEGORY_LABELS[club.category]}</Text>
+            </View>
             <Text style={styles.clubName}>{club.name}</Text>
             <View style={styles.locationRow}>
-              <Ionicons name="location-sharp" size={14} color={club.color} />
-              <Text style={styles.locationText}>{club.city}</Text>
-            </View>
-            <View style={styles.ratingRow}>
-              <Text style={[styles.stars, { color: club.color }]}>
-                {'★'.repeat(Math.round(club.rating))}{'☆'.repeat(5 - Math.round(club.rating))}
+              <Ionicons
+                name={(LOCATION_STATUS_ICONS[club.locationStatus ?? 'fixed']) as any}
+                size={13} color={club.color}
+              />
+              <Text style={styles.locationText}>
+                {club.city}{club.region && club.region !== club.city ? ` · ${club.region}` : ''}
               </Text>
-              <Text style={styles.ratingNum}>{club.rating}</Text>
             </View>
+            {club.rating !== undefined && (
+              <View style={styles.ratingRow}>
+                <Text style={[styles.stars, { color: club.color }]}>
+                  {'★'.repeat(Math.round(club.rating))}{'☆'.repeat(5 - Math.round(club.rating))}
+                </Text>
+                <Text style={styles.ratingNum}>{club.rating}</Text>
+              </View>
+            )}
           </View>
         </View>
 
         {/* Primary CTA — top position */}
         {hasTicket && (
           <View style={styles.topCta}>
-            <BuyTicketsButton url={ticketUrl} color={club.color} />
+            <BuyTicketsButton url={ticketUrl!} color={club.color} />
           </View>
         )}
 
@@ -152,13 +178,24 @@ export default function ClubDetailScreen() {
           </View>
         )}
 
-        {/* Info Grid — MVP relevant only */}
+        {/* Location status banner — for non-fixed locations */}
+        {club.locationStatus && club.locationStatus !== 'fixed' && (
+          <View style={[styles.locationBanner, { borderColor: club.color + '40', backgroundColor: club.color + '10' }]}>
+            <Ionicons name={(LOCATION_STATUS_ICONS[club.locationStatus]) as any} size={16} color={club.color} />
+            <Text style={[styles.locationBannerText, { color: club.color }]}>
+              {LOCATION_STATUS_LABELS[club.locationStatus]}
+            </Text>
+          </View>
+        )}
+
+        {/* Info Grid */}
         <View style={styles.infoGrid}>
           {!!club.hours    && <InfoBox icon="time-outline"     label="שעות"    value={club.hours}           color={club.color} />}
           {!!club.openDays && <InfoBox icon="calendar-outline" label="ימים"    value={club.openDays}        color={club.color} />}
           {!!club.startDate && <InfoBox icon="calendar-outline" label="תאריך" value={club.startDate + (club.endDate ? ` — ${club.endDate}` : '')} color={club.color} />}
-          <InfoBox icon="cash-outline"     label="כניסה"   value={club.entryPrice}      color={club.color} />
+          {!!club.entryPrice && <InfoBox icon="cash-outline" label="כניסה" value={club.entryPrice} color={club.color} />}
           {club.minAge !== undefined && <InfoBox icon="person-outline" label="גיל מינ׳" value={`${club.minAge}+`} color={club.color} />}
+          {!!club.dressCode && <InfoBox icon="shirt-outline" label="קוד לבוש" value={club.dressCode} color={club.color} />}
         </View>
 
         {/* Music */}
@@ -199,10 +236,18 @@ export default function ClubDetailScreen() {
           </View>
         )}
 
+        {/* Verification note */}
+        {club.verificationStatus === 'needs_verification' && !!club.verificationNotes && (
+          <View style={styles.verificationBanner}>
+            <Ionicons name="warning-outline" size={15} color="#f59e0b" />
+            <Text style={styles.verificationText}>{club.verificationNotes}</Text>
+          </View>
+        )}
+
         {/* Bottom CTA */}
         <View style={styles.bottomCta}>
           {hasTicket ? (
-            <BuyTicketsButton url={ticketUrl} color={club.color} />
+            <BuyTicketsButton url={ticketUrl!} color={club.color} />
           ) : (
             <View style={styles.noTicketBox}>
               <Ionicons name="information-circle-outline" size={18} color="#4b5563" />
@@ -260,6 +305,24 @@ const styles = StyleSheet.create({
   ratingNum: { fontSize: 14, fontWeight: '800', color: '#fff' },
 
   section: { paddingHorizontal: 20, marginBottom: 20 },
+  categoryBadge: {
+    alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4,
+    borderRadius: 10, borderWidth: 1, marginBottom: 6,
+  },
+  categoryBadgeText: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+  locationBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginHorizontal: 20, marginBottom: 16,
+    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1,
+  },
+  locationBannerText: { fontSize: 13, fontWeight: '600', flex: 1 },
+  verificationBanner: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    marginHorizontal: 20, marginBottom: 16,
+    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12,
+    backgroundColor: '#f59e0b18', borderWidth: 1, borderColor: '#f59e0b40',
+  },
+  verificationText: { fontSize: 12, color: '#f59e0b', lineHeight: 18, flex: 1, textAlign: 'right' },
   description: { fontSize: 14, color: '#9ca3af', lineHeight: 22, textAlign: 'right' },
   sectionTitle: { fontSize: 14, fontWeight: '700', color: '#d1d5db', marginBottom: 10, textAlign: 'right' },
 

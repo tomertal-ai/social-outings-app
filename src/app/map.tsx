@@ -68,11 +68,13 @@ function AnimatedExperienceCard({ exp, index, total, isSelected, onLayout, onPre
           <Text style={styles.clubCity} numberOfLines={1}>{exp.city}</Text>
         </View>
         <View style={styles.clubRight}>
-          <View style={styles.clubRatingRow}>
-            <Text style={[styles.clubRatingStar, { color: exp.color }]}>★</Text>
-            <Text style={styles.clubRatingValue}>{exp.rating}</Text>
-          </View>
-          <Text style={styles.clubPrice} numberOfLines={1}>{exp.entryPrice}</Text>
+          {exp.rating !== undefined && (
+            <View style={styles.clubRatingRow}>
+              <Text style={[styles.clubRatingStar, { color: exp.color }]}>★</Text>
+              <Text style={styles.clubRatingValue}>{exp.rating}</Text>
+            </View>
+          )}
+          {!!exp.entryPrice && <Text style={styles.clubPrice} numberOfLines={1}>{exp.entryPrice}</Text>}
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -102,6 +104,7 @@ export default function MapScreen() {
   const visibleExperiences = useMemo(() => {
     if (!mapBounds) return categoryData;
     return categoryData.filter(e =>
+      e.latitude  !== undefined && e.longitude !== undefined &&
       e.latitude  <= mapBounds.north &&
       e.latitude  >= mapBounds.south &&
       e.longitude <= mapBounds.east  &&
@@ -133,7 +136,9 @@ export default function MapScreen() {
 
   const focusExperience = useCallback((exp: Experience) => {
     setSelected(exp);
-    setMapCenter({ lat: exp.latitude, lng: exp.longitude, zoom: 15 });
+    if (exp.latitude !== undefined && exp.longitude !== undefined) {
+      setMapCenter({ lat: exp.latitude, lng: exp.longitude, zoom: 15 });
+    }
     bottomSheetRef.current?.snapToIndex(1);
     const yOffset = cardRefs.current[exp.id];
     if (yOffset !== undefined && sheetListRef.current) {

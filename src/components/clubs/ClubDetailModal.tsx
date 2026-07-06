@@ -46,11 +46,13 @@ export default function ClubDetailModal({ club, onClose, onViewDetails }: Props)
                 <ClubAvatar club={club} size={56} />
               </View>
 
+              {club.rating !== undefined && (
               <View style={styles.ratingRow}>
                 <Text style={[styles.ratingStars, { color: club.color }]}>{stars(club.rating)}</Text>
                 <Text style={styles.ratingNum}>{club.rating}</Text>
                 {club.amenities?.length ? <Text style={styles.ratingCount}>• {club.amenities[0]}</Text> : null}
               </View>
+              )}
             </View>
 
             <View style={styles.infoGrid}>
@@ -58,7 +60,7 @@ export default function ClubDetailModal({ club, onClose, onViewDetails }: Props)
                 { icon: 'time-outline', label: 'שעות', val: club.hours },
                 { icon: 'calendar-outline', label: 'ימים', val: club.openDays },
                 { icon: 'cash-outline', label: 'כניסה', val: club.entryPrice },
-                { icon: 'person-outline', label: "גיל מינ׳", val: club.minAge + '+' },
+                { icon: 'person-outline', label: "גיל מינ׳", val: club.minAge !== undefined ? `${club.minAge}+` : '' },
                 { icon: 'location-outline', label: 'כתובת', val: club.address },
                 { icon: 'musical-notes-outline', label: 'מוזיקה', val: (club.musicGenres ?? []).join(', ') },
               ].filter(item => !!item.val).map((item, idx) => (

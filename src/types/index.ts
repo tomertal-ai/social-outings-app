@@ -9,9 +9,9 @@ export type ExperienceCategory =
 
 export const CATEGORY_LABELS: Record<ExperienceCategory, string> = {
   clubs:          'מועדונים',
-  nature_parties: 'פסטי טבע',
+  nature_parties: 'מסיבות טבע',
   festivals:      'פסטיבלים',
-  concerts:       'קונצרטים',
+  concerts:       'הופעות',
 };
 
 export const CATEGORY_ICONS: Record<ExperienceCategory, string> = {
@@ -24,6 +24,9 @@ export const CATEGORY_ICONS: Record<ExperienceCategory, string> = {
 // ---------------------------------------------------------------------------
 // Base Experience — all categories share this
 // ---------------------------------------------------------------------------
+export type LocationStatus = 'fixed' | 'announced' | 'secret' | 'tba';
+export type VerificationStatus = 'verified' | 'needs_verification' | 'unverified';
+
 export interface Experience {
   id: number;
   category: ExperienceCategory;
@@ -36,9 +39,11 @@ export interface Experience {
 
   // Location
   city: string;
-  address: string;
-  latitude: number;
-  longitude: number;
+  region?: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  locationStatus?: LocationStatus;
 
   // Content
   description: string;
@@ -46,18 +51,18 @@ export interface Experience {
   images?: string[];
 
   // Discovery info
-  rating: number;
-  entryPrice: string;
+  rating?: number;
+  entryPrice?: string;
 
-  // Music / vibe (optional — not all categories use these)
+  // Music / vibe
   musicGenres?: string[];
   amenities?: string[];
 
-  // Schedule (optional)
+  // Schedule (recurring venues)
   openDays?: string;
   hours?: string;
 
-  // Date-based (festivals, concerts)
+  // Date-based (festivals, concerts, one-off events)
   startDate?: string;
   endDate?: string;
 
@@ -69,6 +74,10 @@ export interface Experience {
   ticketUrl?: string;
   website?: string;
   instagram?: string;
+
+  // Data quality
+  verificationStatus: VerificationStatus;
+  verificationNotes?: string;
 }
 
 // ---------------------------------------------------------------------------
