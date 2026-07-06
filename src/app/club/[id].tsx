@@ -1,8 +1,8 @@
 import {
   View, Text, ScrollView, TouchableOpacity,
-  Linking, StyleSheet, Platform, Animated,
+  Linking, StyleSheet, Platform, Animated, Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
@@ -82,7 +82,10 @@ export default function ClubDetailScreen() {
   const router = useRouter();
   const club = allExperiences.find(c => String(c.id) === id);
   const [isSaved, setIsSaved] = useState(false);
+  const [coverError, setCoverError] = useState(false);
   const heartScale = useRef(new Animated.Value(1)).current;
+  const showCover = !!club?.coverImageUri && !coverError;
+  const { top: topInset } = useSafeAreaInsets();
 
   if (!club) {
     return (
@@ -116,52 +119,73 @@ export default function ClubDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={[]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
 
-        {/* Header bar */}
-        <View style={styles.headerRow}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn} activeOpacity={0.7}>
-            <Ionicons name={Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back'} size={22} color="#fff" />
-          </TouchableOpacity>
-          <Animated.View style={{ transform: [{ scale: heartScale }] }}>
-            <TouchableOpacity onPress={toggleSave} style={styles.headerBtn} activeOpacity={0.7}>
-              <Ionicons
-                name={isSaved ? 'heart' : 'heart-outline'}
-                size={22}
-                color={isSaved ? '#ef4444' : '#fff'}
+        {/* ── Hero Cover ── */}
+        <View style={[styles.heroCover, { backgroundColor: club.color + '20' }]}>
+          {showCover ? (
+            <>
+              <Image
+                source={{ uri: club.coverImageUri }}
+                style={styles.heroCoverBg}
+                resizeMode="cover"
+                onError={() => setCoverError(true)}
               />
+              <View style={styles.heroCoverOverlay} />
+            </>
+          ) : (
+            <>
+              <View style={[styles.heroCoverBlob1, { backgroundColor: club.color + '35' }]} />
+              <View style={[styles.heroCoverBlob2, { backgroundColor: club.color + '18' }]} />
+            </>
+          )}
+
+          {/* Back + Save buttons overlaid on cover */}
+          <View style={[styles.heroCoverBtns, { top: topInset + 8 }]}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.headerBtn} activeOpacity={0.7}>
+              <Ionicons name={Platform.OS === 'ios' ? 'chevron-back' : 'arrow-back'} size={22} color="#fff" />
             </TouchableOpacity>
-          </Animated.View>
+            <Animated.View style={{ transform: [{ scale: heartScale }] }}>
+              <TouchableOpacity onPress={toggleSave} style={styles.headerBtn} activeOpacity={0.7}>
+                <Ionicons
+                  name={isSaved ? 'heart' : 'heart-outline'}
+                  size={22}
+                  color={isSaved ? '#ef4444' : '#fff'}
+                />
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+
+          {/* Avatar centered on cover */}
+          <View style={[styles.heroCoverAvatar, { borderColor: club.color + '70', backgroundColor: club.color + '30' }]}>
+            <ClubAvatar club={club} size={64} />
+          </View>
         </View>
 
-        {/* Hero */}
-        <View style={styles.hero}>
-          <ClubAvatar club={club} size={80} />
-          <View style={styles.heroText}>
-            {/* Category badge */}
-            <View style={[styles.categoryBadge, { backgroundColor: club.color + '22', borderColor: club.color + '55' }]}>
-              <Text style={[styles.categoryBadgeText, { color: club.color }]}>{CATEGORY_LABELS[club.category]}</Text>
-            </View>
-            <Text style={styles.clubName}>{club.name}</Text>
-            <View style={styles.locationRow}>
-              <Ionicons
-                name={(LOCATION_STATUS_ICONS[club.locationStatus ?? 'fixed']) as any}
-                size={13} color={club.color}
-              />
-              <Text style={styles.locationText}>
-                {club.city}{club.region && club.region !== club.city ? ` · ${club.region}` : ''}
-              </Text>
-            </View>
-            {club.rating !== undefined && (
-              <View style={styles.ratingRow}>
-                <Text style={[styles.stars, { color: club.color }]}>
-                  {'★'.repeat(Math.round(club.rating))}{'☆'.repeat(5 - Math.round(club.rating))}
-                </Text>
-                <Text style={styles.ratingNum}>{club.rating}</Text>
-              </View>
-            )}
+        {/* Club name + meta below cover */}
+        <View style={styles.heroInfo}>
+          <View style={[styles.categoryBadge, { backgroundColor: club.color + '22', borderColor: club.color + '55' }]}>
+            <Text style={[styles.categoryBadgeText, { color: club.color }]}>{CATEGORY_LABELS[club.category]}</Text>
           </View>
+          <Text style={styles.clubName}>{club.name}</Text>
+          <View style={styles.locationRow}>
+            <Ionicons
+              name={(LOCATION_STATUS_ICONS[club.locationStatus ?? 'fixed']) as any}
+              size={13} color={club.color}
+            />
+            <Text style={styles.locationText}>
+              {club.city}{club.region && club.region !== club.city ? ` · ${club.region}` : ''}
+            </Text>
+          </View>
+          {club.rating !== undefined && (
+            <View style={styles.ratingRow}>
+              <Text style={[styles.stars, { color: club.color }]}>
+                {'★'.repeat(Math.round(club.rating))}{'☆'.repeat(5 - Math.round(club.rating))}
+              </Text>
+              <Text style={styles.ratingNum}>{club.rating}</Text>
+            </View>
+          )}
         </View>
 
         {/* Primary CTA — top position */}
@@ -274,10 +298,6 @@ const styles = StyleSheet.create({
   backBtn: { paddingHorizontal: 24, paddingVertical: 10, backgroundColor: '#161622', borderRadius: 12 },
   backBtnText: { color: '#fff', fontWeight: '700' },
 
-  headerRow: {
-    paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-  },
   headerBtn: {
     width: 40, height: 40, borderRadius: 13,
     backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
@@ -297,12 +317,30 @@ const styles = StyleSheet.create({
   },
   noTicketText: { fontSize: 14, color: '#4b5563', fontWeight: '600' },
 
-  hero: {
-    flexDirection: 'row', alignItems: 'center', gap: 18,
-    paddingHorizontal: 20, paddingVertical: 20,
+  // Cover hero
+  heroCover: {
+    height: 200, width: '100%',
+    alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden', position: 'relative',
   },
-  heroText: { flex: 1 },
-  clubName: { fontSize: 26, fontWeight: '800', color: '#fff', letterSpacing: -0.5, marginBottom: 4 },
+  heroCoverBg:      { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  heroCoverOverlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.55)' },
+  heroCoverBlob1: { position: 'absolute', top: -40, left: -50, width: 240, height: 240, borderRadius: 120 },
+  heroCoverBlob2: { position: 'absolute', bottom: -50, right: -30, width: 180, height: 180, borderRadius: 90 },
+  heroCoverBtns: {
+    position: 'absolute', top: 12, left: 16, right: 16,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+  },
+  heroCoverAvatar: {
+    width: 76, height: 76, borderRadius: 22,
+    borderWidth: 2.5, alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  heroInfo: {
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 4,
+  },
+
+  clubName: { fontSize: 26, fontWeight: '800', color: '#fff', letterSpacing: -0.5, marginBottom: 4, marginTop: 6 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 6 },
   locationText: { fontSize: 14, color: '#9ca3af', fontWeight: '600' },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
