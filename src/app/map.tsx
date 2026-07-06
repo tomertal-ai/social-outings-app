@@ -395,11 +395,11 @@ const styles = StyleSheet.create({
   // Header
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6,
+    paddingHorizontal: 20, paddingTop: 4, paddingBottom: 2,
   },
   headerLeft: {},
-  title:    { fontSize: 24, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
-  subtitle: { fontSize: 12, color: '#6b7280', marginTop: 1 },
+  title:    { fontSize: 22, fontWeight: '800', color: '#fff', letterSpacing: -0.5, lineHeight: 26 },
+  subtitle: { fontSize: 11, color: '#6b7280', marginTop: 0, lineHeight: 14 },
   iconBtn: {
     width: 38, height: 38, borderRadius: 12, backgroundColor: '#161622',
     alignItems: 'center', justifyContent: 'center',
@@ -407,11 +407,11 @@ const styles = StyleSheet.create({
   },
 
   // Categories
-  categoryScroll:  { flexGrow: 0, marginBottom: 2 },
-  categoryContent: { paddingHorizontal: 16, gap: 7, paddingBottom: 4 },
+  categoryScroll:  { flexGrow: 0, marginBottom: 0 },
+  categoryContent: { paddingHorizontal: 16, gap: 7, paddingBottom: 2 },
   categoryPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
-    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20,
     backgroundColor: '#161622', borderWidth: 1, borderColor: '#2A2A3C',
   },
   categoryPillActive: { backgroundColor: '#7B61FF', borderColor: '#7B61FF' },
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   categoryLabelActive: { color: '#fff' },
 
   // Search
-  searchWrapper: { paddingHorizontal: 16, paddingBottom: 4, zIndex: 100, pointerEvents: 'box-none' as any },
+  searchWrapper: { paddingHorizontal: 16, paddingBottom: 2, zIndex: 100, pointerEvents: 'box-none' as any },
   dropdown: {
     position: 'absolute', top: 54, left: 0, right: 0,
     backgroundColor: '#161622', borderRadius: 16,
