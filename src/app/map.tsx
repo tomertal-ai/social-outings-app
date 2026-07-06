@@ -359,6 +359,7 @@ export default function MapScreen() {
         keyboardBehavior="extend"
         android_keyboardInputMode="adjustResize"
         style={{ marginBottom: sheetMarginBottom }}
+        topInset={overlayH}
       >
         {/* Sheet header */}
         <View style={styles.sheetHeader}>
