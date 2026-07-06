@@ -69,6 +69,38 @@ function buildMapHtml(
   `;
   }).join('');
 
+  // Build JS for approximate area zones
+  const approxAreasJs = list
+    .filter(c => c.approximateArea && c.locationStatus && c.locationStatus !== 'fixed')
+    .map(c => {
+      const area = c.approximateArea!;
+      if (area.type === 'circle' && area.center && area.radius) {
+        return `
+    L.circle([${area.center.lat}, ${area.center.lng}], {
+      radius: ${area.radius},
+      color: '${c.color}',
+      fillColor: '${c.color}',
+      fillOpacity: 0.08,
+      opacity: 0.35,
+      weight: 1.5,
+      dashArray: '6, 6'
+    }).addTo(map).on('click', function() { selectMarker(${c.id}); });`;
+      }
+      if (area.type === 'polygon' && area.coordinates) {
+        const coords = area.coordinates.map(([lat, lng]) => `[${lat},${lng}]`).join(',');
+        return `
+    L.polygon([${coords}], {
+      color: '${c.color}',
+      fillColor: '${c.color}',
+      fillOpacity: 0.08,
+      opacity: 0.35,
+      weight: 1.5,
+      dashArray: '6, 6'
+    }).addTo(map).on('click', function() { selectMarker(${c.id}); });`;
+      }
+      return '';
+    }).join('');
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -155,6 +187,7 @@ function buildMapHtml(
     }
   });
 
+  ${approxAreasJs}
   ${markersJs}
   map.addLayer(markers);
   ${selectedId ? `highlightMarker(${selectedId});` : ''}

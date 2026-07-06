@@ -180,11 +180,16 @@ export default function ClubDetailScreen() {
 
         {/* Location status banner — for non-fixed locations */}
         {club.locationStatus && club.locationStatus !== 'fixed' && (
-          <View style={[styles.locationBanner, { borderColor: club.color + '40', backgroundColor: club.color + '10' }]}>
-            <Ionicons name={(LOCATION_STATUS_ICONS[club.locationStatus]) as any} size={16} color={club.color} />
-            <Text style={[styles.locationBannerText, { color: club.color }]}>
-              {LOCATION_STATUS_LABELS[club.locationStatus]}
-            </Text>
+          <View style={[styles.locationBanner, { borderColor: '#f59e0b40', backgroundColor: '#f59e0b0e' }]}>
+            <Ionicons name={(LOCATION_STATUS_ICONS[club.locationStatus]) as any} size={16} color="#f59e0b" />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.locationBannerText}>
+                {LOCATION_STATUS_LABELS[club.locationStatus]}
+              </Text>
+              {!!club.approximateArea?.regionName && (
+                <Text style={styles.locationBannerRegion}>📍 אזור: {club.approximateArea.regionName}</Text>
+              )}
+            </View>
           </View>
         )}
 
@@ -315,7 +320,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 20, marginBottom: 16,
     paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: 1,
   },
-  locationBannerText: { fontSize: 13, fontWeight: '600', flex: 1 },
+  locationBannerText: { fontSize: 13, fontWeight: '600', color: '#f59e0b', lineHeight: 19 },
+  locationBannerRegion: { fontSize: 12, color: '#fbbf24', marginTop: 3, fontWeight: '500' },
   verificationBanner: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
     marginHorizontal: 20, marginBottom: 16,

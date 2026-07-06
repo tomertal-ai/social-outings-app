@@ -69,7 +69,9 @@ function AnimatedExperienceCard({ exp, index, total, isSelected, onLayout, onPre
           {exp.locationStatus && exp.locationStatus !== 'fixed' && (
             <View style={styles.approxBadge}>
               <Ionicons name="warning-outline" size={10} color="#f59e0b" />
-              <Text style={styles.approxBadgeText}>מיקום משוער</Text>
+              <Text style={styles.approxBadgeText}>
+                {exp.approximateArea?.regionName ? `מיקום משוער · ${exp.approximateArea.regionName}` : 'מיקום משוער'}
+              </Text>
             </View>
           )}
         </View>

@@ -25,6 +25,14 @@ export const CATEGORY_ICONS: Record<ExperienceCategory, string> = {
 // Base Experience — all categories share this
 // ---------------------------------------------------------------------------
 export type LocationStatus = 'fixed' | 'announced' | 'secret' | 'tba';
+
+export interface ApproximateArea {
+  type: 'circle' | 'polygon' | 'region';
+  center?: { lat: number; lng: number };
+  radius?: number;                         // meters, used when type === 'circle'
+  coordinates?: [number, number][];        // [lat, lng] pairs, used when type === 'polygon'
+  regionName?: string;                     // e.g. "נגב", "גן פארק, תל אביב"
+}
 export type VerificationStatus = 'verified' | 'needs_verification' | 'unverified';
 
 export interface Experience {
@@ -44,6 +52,7 @@ export interface Experience {
   latitude?: number;
   longitude?: number;
   locationStatus?: LocationStatus;
+  approximateArea?: ApproximateArea;
 
   // Content
   description: string;
