@@ -6,7 +6,7 @@ import { Experience, ExperienceCategory } from '../types';
 const clubsData: Experience[] = [
   {
     id: 1, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&q=80',
     name: 'The Block', initials: 'TB', color: '#7c3aed',
     city: 'Tel Aviv', address: '157 HaAluf David St, Tel Aviv',
     latitude: 32.0538, longitude: 34.7620, locationStatus: 'fixed',
@@ -21,7 +21,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 2, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?w=800&q=80',
     name: 'Kuli Alma', initials: 'KA', color: '#ec4899',
     city: 'Tel Aviv', address: '10 Mikve Israel St, Tel Aviv',
     latitude: 32.0605, longitude: 34.7725, locationStatus: 'fixed',
@@ -36,7 +36,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 3, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
     name: 'Shalvata', initials: 'SH', color: '#06b6d4',
     city: 'Tel Aviv', address: 'Tel Aviv Port (Namal), Tel Aviv',
     latitude: 32.0958, longitude: 34.7738, locationStatus: 'fixed',
@@ -51,7 +51,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 4, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80',
     name: 'Haoman 17', initials: 'H1', color: '#dc2626',
     city: 'Jerusalem', address: '17 HaOman St, Talpiot, Jerusalem',
     latitude: 31.7515, longitude: 35.2120, locationStatus: 'fixed',
@@ -66,7 +66,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 5, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1545128485-c400e7702796?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=800&q=80',
     name: 'Gagarin Club', initials: 'GC', color: '#64748b',
     city: 'Tel Aviv', address: '13 Kibbutz Galuyot Rd, Tel Aviv',
     latitude: 32.0520, longitude: 34.7650, locationStatus: 'fixed',
@@ -80,7 +80,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 6, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80',
     name: 'Atlanta TLV', initials: 'AT', color: '#0ea5e9',
     city: 'Tel Aviv', address: '30 Ibn Gavirol St, Tel Aviv',
     latitude: 32.0853, longitude: 34.7818, locationStatus: 'fixed',
@@ -94,7 +94,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 7, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&q=80',
     name: 'The Cappella', initials: 'CP', color: '#d97706',
     city: 'Tel Aviv', address: "28 HaArba'a St, Tel Aviv",
     latitude: 32.0697, longitude: 34.7897, locationStatus: 'fixed',
@@ -136,7 +136,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 10, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1604014237800-1c9102c219da?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
     name: 'Duplex Club', initials: 'DC', color: '#f97316',
     city: 'Tel Aviv', address: 'Florentin, Tel Aviv',
     latitude: 32.0565, longitude: 34.7720, locationStatus: 'fixed',
@@ -163,7 +163,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 12, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80',
     name: 'Factory Haifa', initials: 'FC', color: '#6366f1',
     city: 'Haifa', address: '110 HaLutzei HaTaasiya St, Haifa',
     latitude: 32.8070, longitude: 34.9650, locationStatus: 'fixed',
@@ -177,7 +177,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 13, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?w=800&q=80',
     name: 'Selena Eilat', initials: 'SL', color: '#f59e0b',
     city: 'Eilat', address: '8 Carmel St, Eilat',
     latitude: 29.5585, longitude: 34.9480, locationStatus: 'fixed',
@@ -192,7 +192,7 @@ const clubsData: Experience[] = [
   },
   {
     id: 14, category: 'clubs', verificationStatus: 'verified',
-    coverImageUri: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
+    coverImageUri: 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800&q=80',
     name: 'Jimmy Who', initials: 'JW', color: '#f43f5e',
     city: 'Tel Aviv', address: '24 Rothschild Blvd, Tel Aviv',
     latitude: 32.0632, longitude: 34.7708, locationStatus: 'fixed',
