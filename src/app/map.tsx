@@ -49,6 +49,13 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
   const isApprox = exp.locationStatus && exp.locationStatus !== 'fixed';
   const cityLabel = exp.approximateArea?.regionName ?? exp.city;
 
+  // Simple status badge — rotate through Open/Trending/Popular based on rating
+  const statusBadge = exp.rating !== undefined && exp.rating >= 4.6
+    ? { label: 'Trending 🔥', bg: '#2d1a00', border: '#f59e0b50', text: '#f59e0b' }
+    : exp.rating !== undefined && exp.rating >= 4.3
+    ? { label: 'Popular ⭐', bg: '#1a1a2e', border: '#7B61FF50', text: '#a78bfa' }
+    : { label: 'Open Tonight', bg: '#0d1f0d', border: '#22c55e50', text: '#4ade80' };
+
   return (
     <Animated.View
       style={[styles.richCardWrap, { transform: [{ scale }] }, index < total - 1 && styles.richCardGap]}
@@ -59,16 +66,17 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
         onPressIn={onPressIn}
         onPressOut={onPressOut}
         onPress={onPress}
-        style={[styles.richCard, isSelected && { borderColor: exp.color + '80', borderWidth: 1.5 }]}
+        style={[styles.richCard, isSelected && { borderColor: exp.color + '90', borderWidth: 1.5 }]}
       >
         {/* ── Cover ── */}
-        <View style={[styles.richCover, { backgroundColor: exp.color + '18' }]}>
-          {/* Gradient overlay bars for visual texture */}
-          <View style={[styles.richCoverAccent, { backgroundColor: exp.color + '30' }]} />
-          <View style={[styles.richCoverAccent2, { backgroundColor: exp.color + '15' }]} />
+        <View style={[styles.richCover, { backgroundColor: exp.color + '20' }]}>
+          {/* Background blobs */}
+          <View style={[styles.richCoverAccent,  { backgroundColor: exp.color + '35' }]} />
+          <View style={[styles.richCoverAccent2, { backgroundColor: exp.color + '18' }]} />
+          <View style={[styles.richCoverAccent3, { backgroundColor: exp.color + '12' }]} />
 
-          {/* Avatar centered on cover */}
-          <View style={[styles.richCoverAvatar, { borderColor: exp.color + '60', backgroundColor: exp.color + '25' }]}>
+          {/* Logo centered — large, prominent */}
+          <View style={[styles.richCoverAvatar, { borderColor: exp.color + '70', backgroundColor: exp.color + '30' }]}>
             {logo ? (
               <Image source={logo} style={styles.richCoverAvatarImg} />
             ) : (
@@ -78,7 +86,12 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
             )}
           </View>
 
-          {/* Approx badge top-right */}
+          {/* Status badge — top-left */}
+          <View style={[styles.richStatusBadge, { backgroundColor: statusBadge.bg, borderColor: statusBadge.border }]}>
+            <Text style={[styles.richStatusText, { color: statusBadge.text }]}>{statusBadge.label}</Text>
+          </View>
+
+          {/* Approx badge — top-right */}
           {isApprox && (
             <View style={styles.richApproxBadge}>
               <Ionicons name="warning-outline" size={9} color="#f59e0b" />
@@ -86,14 +99,18 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
             </View>
           )}
 
-          {/* Selected accent bar */}
+          {/* Selected top bar */}
           {isSelected && <View style={[styles.richSelectedBar, { backgroundColor: exp.color }]} />}
         </View>
 
         {/* ── Body ── */}
         <View style={styles.richBody}>
-          {/* Name */}
-          <Text style={styles.richName} numberOfLines={1}>{exp.name}</Text>
+
+          {/* Name + arrow */}
+          <View style={styles.richNameRow}>
+            <Text style={styles.richName} numberOfLines={1}>{exp.name}</Text>
+            <Ionicons name="chevron-forward" size={16} color="#3A3A4C" />
+          </View>
 
           {/* City */}
           <View style={styles.richCityRow}>
@@ -120,22 +137,23 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
                 <Text style={styles.richPriceText}>{exp.entryPrice}</Text>
               </View>
             )}
+            {!!exp.hours && (
+              <View style={styles.richHoursPill}>
+                <Ionicons name="time-outline" size={10} color="#6b7280" />
+                <Text style={styles.richHoursText}>{exp.hours}</Text>
+              </View>
+            )}
           </View>
 
-          {/* Genre chips */}
+          {/* Genre chips — wrapping */}
           {exp.musicGenres && exp.musicGenres.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.richGenreScroll}
-              contentContainerStyle={styles.richGenreContent}
-            >
-              {exp.musicGenres.slice(0, 4).map(g => (
+            <View style={styles.richGenreWrap}>
+              {exp.musicGenres.slice(0, 5).map(g => (
                 <View key={g} style={[styles.richGenreChip, { borderColor: exp.color + '40' }]}>
                   <Text style={[styles.richGenreText, { color: exp.color }]}>{g}</Text>
                 </View>
               ))}
-            </ScrollView>
+            </View>
           )}
         </View>
       </TouchableOpacity>
@@ -519,25 +537,35 @@ const styles = StyleSheet.create({
 
   // Cover
   richCover: {
-    height: 80, width: '100%',
+    height: 96, width: '100%',
     alignItems: 'center', justifyContent: 'center',
     overflow: 'hidden', position: 'relative',
   },
   richCoverAccent: {
-    position: 'absolute', top: -20, left: -30,
-    width: 160, height: 160, borderRadius: 80,
+    position: 'absolute', top: -30, left: -40,
+    width: 180, height: 180, borderRadius: 90,
   },
   richCoverAccent2: {
-    position: 'absolute', bottom: -30, right: -20,
-    width: 120, height: 120, borderRadius: 60,
+    position: 'absolute', bottom: -40, right: -20,
+    width: 140, height: 140, borderRadius: 70,
+  },
+  richCoverAccent3: {
+    position: 'absolute', top: 10, right: 60,
+    width: 80, height: 80, borderRadius: 40,
   },
   richCoverAvatar: {
-    width: 52, height: 52, borderRadius: 16,
+    width: 58, height: 58, borderRadius: 18,
     borderWidth: 2, alignItems: 'center', justifyContent: 'center',
     overflow: 'hidden',
   },
   richCoverAvatarImg:   { width: '100%', height: '100%' },
-  richCoverInitials:    { fontSize: 18, fontWeight: '800' },
+  richCoverInitials:    { fontSize: 20, fontWeight: '800' },
+  richStatusBadge: {
+    position: 'absolute', top: 8, left: 8,
+    borderRadius: 8, borderWidth: 1,
+    paddingHorizontal: 7, paddingVertical: 3,
+  },
+  richStatusText: { fontSize: 10, fontWeight: '700' },
   richApproxBadge: {
     position: 'absolute', top: 8, right: 8,
     flexDirection: 'row', alignItems: 'center', gap: 3,
@@ -552,32 +580,40 @@ const styles = StyleSheet.create({
   },
 
   // Body
-  richBody:    { paddingHorizontal: 14, paddingTop: 10, paddingBottom: 12, gap: 6 },
-  richName:    { fontSize: 16, fontWeight: '800', color: '#f9fafb', letterSpacing: -0.3 },
+  richBody:    { paddingHorizontal: 14, paddingTop: 11, paddingBottom: 13, gap: 7 },
+  richNameRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  richName:    { fontSize: 16, fontWeight: '800', color: '#f9fafb', letterSpacing: -0.3, flex: 1 },
   richCityRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   richCity:      { fontSize: 12, color: '#6b7280', fontWeight: '500' },
   richCityApprox:{ color: '#f59e0b' },
 
-  richMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  richMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' as any },
   richRatingPill: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: '#1f1f2e', borderRadius: 8,
-    paddingHorizontal: 8, paddingVertical: 3,
+    paddingHorizontal: 8, paddingVertical: 4,
   },
   richRatingStar: { fontSize: 11 },
   richRatingVal:  { fontSize: 12, fontWeight: '700', color: '#f3f4f6' },
   richPricePill: {
     backgroundColor: '#1f1f2e', borderRadius: 8,
-    paddingHorizontal: 8, paddingVertical: 3,
+    paddingHorizontal: 8, paddingVertical: 4,
   },
   richPriceText: { fontSize: 12, color: '#9ca3af', fontWeight: '600' },
+  richHoursPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: '#1f1f2e', borderRadius: 8,
+    paddingHorizontal: 8, paddingVertical: 4,
+  },
+  richHoursText: { fontSize: 11, color: '#6b7280', fontWeight: '500' },
 
-  // Genre chips
-  richGenreScroll:  { marginTop: 2 },
+  // Genre chips — wrapping
+  richGenreScroll:  { marginTop: 0 },
   richGenreContent: { gap: 6 },
+  richGenreWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   richGenreChip: {
     borderRadius: 20, borderWidth: 1,
-    paddingHorizontal: 10, paddingVertical: 3,
+    paddingHorizontal: 10, paddingVertical: 4,
     backgroundColor: 'transparent',
   },
   richGenreText: { fontSize: 11, fontWeight: '600' },
