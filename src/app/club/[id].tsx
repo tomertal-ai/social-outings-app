@@ -13,9 +13,9 @@ import ClubAvatar from '../../components/clubs/ClubAvatar';
 
 const LOCATION_STATUS_LABELS: Record<string, string> = {
   fixed: 'מיקום קבוע',
-  announced: 'מיקום מוכרז לפני האירוע',
-  secret: 'מיקום סודי',
-  tba: 'מיקום TBA',
+  announced: '⚠ מיקום משוער — המיקום המדויק מוכרז לפני האירוע. בדוק ב-Instagram לפני שאתה יוצא.',
+  secret: '⚠ מיקום סודי — המיקום המוצג הוא אזור כללי בלבד. המיקום האמיתי מופץ 24–48 שעות לפני.',
+  tba: '⚠ מיקום עדיין לא נקבע (TBA) — המיקום המוצג הוא אומדן בלבד. עקוב אחרי הערוצים הרשמיים.',
 };
 
 const LOCATION_STATUS_ICONS: Record<string, string> = {

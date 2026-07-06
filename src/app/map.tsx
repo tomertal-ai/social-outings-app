@@ -66,6 +66,12 @@ function AnimatedExperienceCard({ exp, index, total, isSelected, onLayout, onPre
         <View style={styles.clubInfo}>
           <Text style={styles.clubName} numberOfLines={1}>{exp.name}</Text>
           <Text style={styles.clubCity} numberOfLines={1}>{exp.city}</Text>
+          {exp.locationStatus && exp.locationStatus !== 'fixed' && (
+            <View style={styles.approxBadge}>
+              <Ionicons name="warning-outline" size={10} color="#f59e0b" />
+              <Text style={styles.approxBadgeText}>מיקום משוער</Text>
+            </View>
+          )}
         </View>
         <View style={styles.clubRight}>
           {exp.rating !== undefined && (
@@ -422,6 +428,14 @@ const styles = StyleSheet.create({
   clubCity: {
     fontSize: 12, color: '#6b7280', fontWeight: '500',
   },
+  approxBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    marginTop: 3, alignSelf: 'flex-start',
+    backgroundColor: '#f59e0b18', borderRadius: 6,
+    paddingHorizontal: 6, paddingVertical: 2,
+    borderWidth: 1, borderColor: '#f59e0b40',
+  },
+  approxBadgeText: { fontSize: 10, color: '#f59e0b', fontWeight: '700' },
 
   clubRight: {
     alignItems: 'flex-end', gap: 3,

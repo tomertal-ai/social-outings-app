@@ -40,15 +40,23 @@ function buildMapHtml(
 
   const markersJs = list.map(c => {
     const logoUri = getLogoUri(c);
+    const isApprox = c.locationStatus && c.locationStatus !== 'fixed';
     const avatar = logoUri
       ? `<img class="marker-avatar" src="${logoUri}" alt="${c.name}" />`
       : `<div class="marker-initials" style="background-color:${c.color};">${getExperienceInitials(c)}</div>`;
+    const approxIndicator = isApprox
+      ? `<div class="marker-approx-dot" title="מיקום משוער">⚠</div>`
+      : '';
+    const pillStyle = isApprox
+      ? `border-color: rgba(245,158,11,0.6); border-style: dashed;`
+      : `border-color: rgba(123,97,255,0.35);`;
     return `
     var icon${c.id} = L.divIcon({
       html: \`<div class="marker-root" id="marker-${c.id}" onclick="selectMarker(${c.id})">
-        <div class="marker-pill" style="border-color: rgba(123,97,255,0.35);">
+        <div class="marker-pill" style="${pillStyle}">
           ${avatar}
           <div class="marker-name">${c.name}</div>
+          ${approxIndicator}
         </div>
       </div>\`,
       className: '',
@@ -88,6 +96,7 @@ function buildMapHtml(
   .marker-initials { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-left:4px; flex-shrink:0; font-size:12px; font-weight:800; color:#fff; }
   .marker-name { font-size:12px; font-weight:700; color:#fff; padding:0 12px 0 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:110px; }
   .marker-root.active .marker-pill { transform:scale(1.08); border-color:#7B61FF; box-shadow:0 6px 20px rgba(0,0,0,0.6), 0 0 16px rgba(123,97,255,0.5); }
+  .marker-approx-dot { font-size:10px; padding-right:6px; flex-shrink:0; opacity:0.85; }
   .leaflet-control-attribution { font-size:8px; opacity:0.3; color:#9ca3af; }
   .leaflet-control-attribution a { color:#9ca3af; }
   .leaflet-control-zoom { border:none !important; box-shadow:0 4px 16px rgba(0,0,0,0.4) !important; border-radius:12px !important; overflow:hidden; }
