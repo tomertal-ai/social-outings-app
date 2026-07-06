@@ -132,11 +132,13 @@ export default function MapScreen() {
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const sheetListRef   = useRef<any>(null);
-  const [overlayHeight, setOverlayHeight] = useState(180); // measured below
-  const snapFull = useMemo(
-    () => SCREEN_H - overlayHeight - TAB_BAR_HEIGHT - bottomInset,
-    [overlayHeight, bottomInset]
-  );
+  // Overlay height = topInset + header(~52) + searchBar(~44) + chips(~38) + gaps(~10)
+  const HEADER_H   = 52;
+  const SEARCH_H   = 44;
+  const CHIPS_H    = 38;
+  const GAPS_H     = 10;
+  const overlayH   = Math.max(topInset, 8) + HEADER_H + SEARCH_H + CHIPS_H + GAPS_H;
+  const snapFull   = SCREEN_H - overlayH - TAB_BAR_HEIGHT - bottomInset - 8;
   const snapPoints = useMemo(
     () => [SNAP_PEEK, Math.round(snapFull * 0.5), snapFull],
     [snapFull]
@@ -246,7 +248,6 @@ export default function MapScreen() {
       <View
         style={[styles.overlay, { paddingTop: Math.max(topInset - 4, 8) }]}
         pointerEvents="box-none"
-        onLayout={e => setOverlayHeight(e.nativeEvent.layout.height)}
       >
 
       {/* ── Floating header overlay ── */}
