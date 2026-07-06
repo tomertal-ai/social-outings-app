@@ -132,7 +132,15 @@ export default function MapScreen() {
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const sheetListRef   = useRef<any>(null);
-  const snapPoints = useMemo(() => [SNAP_PEEK, SNAP_MID, SNAP_FULL], []);
+  const [overlayHeight, setOverlayHeight] = useState(180); // measured below
+  const snapFull = useMemo(
+    () => SCREEN_H - overlayHeight - TAB_BAR_HEIGHT - bottomInset,
+    [overlayHeight, bottomInset]
+  );
+  const snapPoints = useMemo(
+    () => [SNAP_PEEK, Math.round(snapFull * 0.5), snapFull],
+    [snapFull]
+  );
 
   const animationConfigs = useBottomSheetSpringConfigs({
     mass: 0.5, stiffness: 320, damping: 32, overshootClamping: false,
@@ -235,7 +243,11 @@ export default function MapScreen() {
       </View>
 
       {/* ── Floating overlay: header + categories + search ── */}
-      <View style={[styles.overlay, { paddingTop: Math.max(topInset - 4, 8) }]} pointerEvents="box-none">
+      <View
+        style={[styles.overlay, { paddingTop: Math.max(topInset - 4, 8) }]}
+        pointerEvents="box-none"
+        onLayout={e => setOverlayHeight(e.nativeEvent.layout.height)}
+      >
 
       {/* ── Floating header overlay ── */}
       <View style={styles.header} pointerEvents="box-none">
