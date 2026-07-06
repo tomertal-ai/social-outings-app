@@ -1,48 +1,73 @@
 import { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { useRouter } from 'expo-router';
 import Logo from '../components/Logo';
 
 export default function SplashScreen() {
   const router = useRouter();
-  const spinValue = useRef(new Animated.Value(0)).current;
-  const pulseValue = useRef(new Animated.Value(0.8)).current;
+  const entryScale   = useRef(new Animated.Value(0.72)).current;
+  const entryOpacity = useRef(new Animated.Value(0)).current;
+  const pulseScale   = useRef(new Animated.Value(1)).current;
+  const textOpacity  = useRef(new Animated.Value(0)).current;
+  const textY        = useRef(new Animated.Value(12)).current;
 
   useEffect(() => {
-    Animated.loop(
-      Animated.timing(spinValue, {
+    // 1. Logo entry — spring-like feel via easing
+    Animated.parallel([
+      Animated.timing(entryScale, {
         toValue: 1,
-        duration: 2500,
+        duration: 600,
+        easing: Easing.out(Easing.back(1.6)),
         useNativeDriver: true,
-      })
-    ).start();
+      }),
+      Animated.timing(entryOpacity, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      // 2. Text fade-in after logo lands
+      Animated.parallel([
+        Animated.timing(textOpacity, {
+          toValue: 1,
+          duration: 380,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(textY, {
+          toValue: 0,
+          duration: 380,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start();
 
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseValue, {
-          toValue: 1.15,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseValue, {
-          toValue: 0.8,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
+      // 3. Subtle breathing pulse
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseScale, {
+            toValue: 1.06,
+            duration: 1400,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseScale, {
+            toValue: 1,
+            duration: 1400,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    });
 
     const timer = setTimeout(() => {
       router.replace('/welcome' as any);
-    }, 3000);
+    }, 3200);
 
     return () => clearTimeout(timer);
   }, []);
-
-  const spin = spinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
 
   return (
     <View style={styles.container}>
@@ -50,14 +75,26 @@ export default function SplashScreen() {
         style={[
           styles.logoWrapper,
           {
-            transform: [{ rotate: spin }, { scale: pulseValue }],
+            opacity: entryOpacity,
+            transform: [
+              { scale: Animated.multiply(entryScale, pulseScale) },
+            ],
           },
         ]}
       >
-        <Logo size={140} />
+        <Logo size={130} />
       </Animated.View>
-      <Text style={styles.appName}>יציאות חברתיות</Text>
-      <Text style={styles.tagline}>צא, תכיר, תהנה</Text>
+
+      <Animated.View
+        style={{
+          opacity: textOpacity,
+          transform: [{ translateY: textY }],
+          alignItems: 'center',
+        }}
+      >
+        <Text style={styles.appName}>Outly</Text>
+        <Text style={styles.tagline}>Discover where to go tonight</Text>
+      </Animated.View>
     </View>
   );
 }
@@ -68,18 +105,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#0f0f1a',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 20,
   },
   logoWrapper: {
-    marginBottom: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   appName: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 34,
+    fontWeight: '800',
     color: '#fff',
-    marginBottom: 8,
+    letterSpacing: -0.8,
+    marginBottom: 6,
   },
   tagline: {
-    fontSize: 16,
-    color: '#9ca3af',
+    fontSize: 15,
+    color: '#6b7280',
+    fontWeight: '500',
+    letterSpacing: 0.1,
   },
 });
