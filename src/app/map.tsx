@@ -2,7 +2,7 @@ import {
   View, Text, TextInput, ScrollView, TouchableOpacity,
   Animated, Keyboard, StyleSheet, Image, Platform, Dimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -116,8 +116,11 @@ function CompactCard({ exp, index, total, isSelected, onLayout, onPress }: CardP
 // ---------------------------------------------------------------------------
 // Main screen
 // ---------------------------------------------------------------------------
+const TAB_BAR_HEIGHT = 60; // approximate tab bar height
+
 export default function MapScreen() {
   const router = useRouter();
+  const { bottom: bottomInset } = useSafeAreaInsets();
   const searchInputRef = useRef<TextInput>(null);
   const [activeCategory, setActiveCategory] = useState<ExperienceCategory>('clubs');
   const [selected, setSelected]   = useState<Experience | null>(null);
@@ -339,6 +342,7 @@ export default function MapScreen() {
         enableContentPanningGesture={!mapInteracting}
         keyboardBehavior="extend"
         android_keyboardInputMode="adjustResize"
+        bottomInset={TAB_BAR_HEIGHT + bottomInset}
       >
         {/* Sheet header */}
         <View style={styles.sheetHeader}>
