@@ -395,11 +395,11 @@ const styles = StyleSheet.create({
   // Header
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingTop: 14, paddingBottom: 10,
+    paddingHorizontal: 20, paddingTop: 8, paddingBottom: 6,
   },
   headerLeft: {},
   title:    { fontSize: 24, fontWeight: '800', color: '#fff', letterSpacing: -0.5 },
-  subtitle: { fontSize: 12, color: '#6b7280', marginTop: 2 },
+  subtitle: { fontSize: 12, color: '#6b7280', marginTop: 1 },
   iconBtn: {
     width: 38, height: 38, borderRadius: 12, backgroundColor: '#161622',
     alignItems: 'center', justifyContent: 'center',
@@ -407,8 +407,8 @@ const styles = StyleSheet.create({
   },
 
   // Categories
-  categoryScroll:  { flexGrow: 0, marginBottom: 4 },
-  categoryContent: { paddingHorizontal: 16, gap: 7, paddingBottom: 6 },
+  categoryScroll:  { flexGrow: 0, marginBottom: 2 },
+  categoryContent: { paddingHorizontal: 16, gap: 7, paddingBottom: 4 },
   categoryPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     paddingHorizontal: 12, paddingVertical: 7, borderRadius: 20,
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
   categoryLabelActive: { color: '#fff' },
 
   // Search
-  searchWrapper: { paddingHorizontal: 16, paddingBottom: 8, zIndex: 100, pointerEvents: 'box-none' as any },
+  searchWrapper: { paddingHorizontal: 16, paddingBottom: 4, zIndex: 100, pointerEvents: 'box-none' as any },
   dropdown: {
     position: 'absolute', top: 54, left: 0, right: 0,
     backgroundColor: '#161622', borderRadius: 16,
