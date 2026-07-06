@@ -244,35 +244,6 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* ── Category pills ── */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryScroll}
-        contentContainerStyle={styles.categoryContent}
-      >
-        {CATEGORIES.map(cat => {
-          const isActive = cat === activeCategory;
-          return (
-            <TouchableOpacity
-              key={cat}
-              onPress={() => switchCategory(cat)}
-              activeOpacity={0.75}
-              style={[styles.categoryPill, isActive && styles.categoryPillActive]}
-            >
-              <Ionicons
-                name={CATEGORY_ICONS[cat] as any}
-                size={13}
-                color={isActive ? '#fff' : '#6b7280'}
-              />
-              <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
-                {CATEGORY_LABELS[cat]}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-
       {/* ── Search bar ── */}
       <View style={styles.searchWrapper} pointerEvents="box-none">
         <ClubSearchBar
@@ -324,6 +295,35 @@ export default function MapScreen() {
           </Animated.View>
         )}
       </View>
+
+      {/* ── Category pills ── */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryScroll}
+        contentContainerStyle={styles.categoryContent}
+      >
+        {CATEGORIES.map(cat => {
+          const isActive = cat === activeCategory;
+          return (
+            <TouchableOpacity
+              key={cat}
+              onPress={() => switchCategory(cat)}
+              activeOpacity={0.75}
+              style={[styles.categoryPill, isActive && styles.categoryPillActive]}
+            >
+              <Ionicons
+                name={CATEGORY_ICONS[cat] as any}
+                size={13}
+                color={isActive ? '#fff' : '#6b7280'}
+              />
+              <Text style={[styles.categoryLabel, isActive && styles.categoryLabelActive]}>
+                {CATEGORY_LABELS[cat]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
 
       </SafeAreaView>
 
