@@ -132,15 +132,14 @@ export default function MapScreen() {
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const sheetListRef   = useRef<any>(null);
-  // Overlay height = topInset + header(~52) + searchBar(~44) + chips(~38) + gaps(~10)
-  const HEADER_H   = 52;
-  const SEARCH_H   = 44;
-  const CHIPS_H    = 38;
-  const GAPS_H     = 10;
-  const overlayH   = Math.max(topInset, 8) + HEADER_H + SEARCH_H + CHIPS_H + GAPS_H;
-  const snapFull   = SCREEN_H - overlayH - TAB_BAR_HEIGHT - bottomInset - 8;
+  // Available map zone = between bottom of overlay and top of tab bar
+  // overlayH: topInset + title(52) + search(44) + chips(38) + spacing(10)
+  const overlayH = Math.max(topInset, 8) + 52 + 44 + 38 + 10;
+  const availableH = SCREEN_H - overlayH - TAB_BAR_HEIGHT - bottomInset;
+  // snapFull = sheet fills the available zone exactly (stops right below chips)
+  const snapFull   = availableH - 4;
   const snapPoints = useMemo(
-    () => [SNAP_PEEK, Math.round(snapFull * 0.5), snapFull],
+    () => [SNAP_PEEK, Math.round(snapFull * 0.48), snapFull],
     [snapFull]
   );
 
