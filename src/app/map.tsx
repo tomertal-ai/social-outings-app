@@ -3,7 +3,7 @@ import {
   Animated, Keyboard, StyleSheet, Image, Platform, Dimensions,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
@@ -48,6 +48,8 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
   const logo = getExperienceLogo(exp);
   const isApprox = exp.locationStatus && exp.locationStatus !== 'fixed';
   const cityLabel = exp.approximateArea?.regionName ?? exp.city;
+  const [coverError, setCoverError] = React.useState(false);
+  const showCoverImage = !!exp.coverImageUri && !coverError;
 
   // Simple status badge — rotate through Open/Trending/Popular based on rating
   const statusBadge = exp.rating !== undefined && exp.rating >= 4.6
@@ -71,14 +73,14 @@ function RichCard({ exp, index, total, isSelected, onLayout, onPress }: CardProp
         {/* ── Cover ── */}
         <View style={[styles.richCover, { backgroundColor: exp.color + '20' }]}>
           {/* Background: real cover image OR gradient blobs */}
-          {exp.coverImageUri ? (
+          {showCoverImage ? (
             <>
               <Image
                 source={{ uri: exp.coverImageUri }}
                 style={styles.richCoverBg}
                 resizeMode="cover"
+                onError={() => setCoverError(true)}
               />
-              {/* Dark overlay so logo + badges remain readable */}
               <View style={styles.richCoverOverlay} />
             </>
           ) : (
